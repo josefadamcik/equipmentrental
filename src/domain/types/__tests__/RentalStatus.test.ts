@@ -1,4 +1,10 @@
-import { RentalStatus, isActive, isCompleted, isInPossession, getRentalStatusValues } from '../RentalStatus.js';
+import {
+  RentalStatus,
+  isActive,
+  isCompleted,
+  isInPossession,
+  getRentalStatusValues,
+} from '../RentalStatus.js';
 
 describe('RentalStatus', () => {
   describe('isActive', () => {

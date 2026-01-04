@@ -16,7 +16,11 @@ export type EquipmentCondition = (typeof EquipmentCondition)[keyof typeof Equipm
  * Check if equipment is available for rental based on condition
  */
 export function isRentable(condition: EquipmentCondition): boolean {
-  return condition === EquipmentCondition.EXCELLENT || condition === EquipmentCondition.GOOD || condition === EquipmentCondition.FAIR;
+  return (
+    condition === EquipmentCondition.EXCELLENT ||
+    condition === EquipmentCondition.GOOD ||
+    condition === EquipmentCondition.FAIR
+  );
 }
 
 /**

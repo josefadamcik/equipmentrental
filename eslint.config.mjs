@@ -8,7 +8,9 @@ export default [
     ignores: ['dist/**', 'node_modules/**', '*.js', 'jest.config.js'],
   },
   {
+    // Non-test TypeScript files
     files: ['src/**/*.ts'],
+    ignores: ['**/*.test.ts', '**/*.spec.ts'],
     languageOptions: {
       parser: tsparser,
       parserOptions: {
@@ -54,12 +56,29 @@ export default [
           format: ['PascalCase'],
         },
       ],
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'TSEnumDeclaration',
+          message: 'Avoid using TypeScript enums. Use `as const` objects instead.',
+        },
+      ],
+      // Allow const object and type to have the same name (common pattern for const enums)
+      'no-redeclare': 'off',
+      '@typescript-eslint/no-redeclare': 'off',
     },
   },
   {
+    // Test files - without project references
     files: ['**/*.test.ts', '**/*.spec.ts'],
     languageOptions: {
+      parser: tsparser,
+      parserOptions: {
+        ecmaVersion: 2022,
+        sourceType: 'module',
+      },
       globals: {
+        console: 'readonly',
         describe: 'readonly',
         it: 'readonly',
         expect: 'readonly',
@@ -69,6 +88,20 @@ export default [
         beforeAll: 'readonly',
         afterAll: 'readonly',
       },
+    },
+    plugins: {
+      '@typescript-eslint': tseslint,
+      prettier: prettier,
+    },
+    rules: {
+      ...eslint.configs.recommended.rules,
+      'prettier/prettier': 'error',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_' },
+      ],
+      'no-redeclare': 'off',
+      '@typescript-eslint/no-redeclare': 'off',
     },
   },
 ];

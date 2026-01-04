@@ -22,7 +22,9 @@ describe('Money', () => {
     });
 
     it('should throw error for more than 2 decimal places', () => {
-      expect(() => Money.dollars(10.123)).toThrow('Money amount must have at most 2 decimal places');
+      expect(() => Money.dollars(10.123)).toThrow(
+        'Money amount must have at most 2 decimal places',
+      );
     });
   });
 

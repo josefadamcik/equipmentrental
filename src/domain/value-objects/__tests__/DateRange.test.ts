@@ -104,7 +104,10 @@ describe('DateRange', () => {
     });
 
     it('should handle single day range', () => {
-      const range = DateRange.create(new Date('2024-01-01T00:00:00'), new Date('2024-01-01T12:00:00'));
+      const range = DateRange.create(
+        new Date('2024-01-01T00:00:00'),
+        new Date('2024-01-01T12:00:00'),
+      );
 
       expect(range.getDays()).toBe(1);
     });

@@ -77,7 +77,9 @@ export class DateRange {
   }
 
   equals(other: DateRange): boolean {
-    return this.start.getTime() === other.start.getTime() && this.end.getTime() === other.end.getTime();
+    return (
+      this.start.getTime() === other.start.getTime() && this.end.getTime() === other.end.getTime()
+    );
   }
 
   toString(): string {

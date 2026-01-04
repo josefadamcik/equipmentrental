@@ -1,4 +1,10 @@
-import { EquipmentId, RentalId, MemberId, ReservationId, DamageAssessmentId } from '../identifiers.js';
+import {
+  EquipmentId,
+  RentalId,
+  MemberId,
+  ReservationId,
+  DamageAssessmentId,
+} from '../identifiers.js';
 
 describe('Identifiers', () => {
   describe('EquipmentId', () => {

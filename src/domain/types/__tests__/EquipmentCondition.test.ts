@@ -1,4 +1,9 @@
-import { EquipmentCondition, isRentable, needsRepair, getEquipmentConditionValues } from '../EquipmentCondition.js';
+import {
+  EquipmentCondition,
+  isRentable,
+  needsRepair,
+  getEquipmentConditionValues,
+} from '../EquipmentCondition.js';
 
 describe('EquipmentCondition', () => {
   describe('isRentable', () => {
