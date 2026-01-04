@@ -32,26 +32,28 @@ Create immutable value objects that encapsulate validation and behavior:
 
 **Test Coverage**: 112 tests passing
 
-### 1.2 Domain Entities
+### 1.2 Domain Entities ✅ COMPLETED
 Build core business entities with rich behavior:
 
-- [ ] `Equipment` - Rental items with availability tracking
-- [ ] `Member` - Customers with tier-based rules
-- [ ] `Rental` - Central aggregate managing rental lifecycle
-- [ ] `Reservation` - Future booking system
-- [ ] `DamageAssessment` - Condition evaluation on return
+- [x] `Equipment` - Rental items with availability tracking
+- [x] `Member` - Customers with tier-based rules
+- [x] `Rental` - Central aggregate managing rental lifecycle
+- [x] `Reservation` - Future booking system
+- [x] `DamageAssessment` - Condition evaluation on return
 
-**Files to create**:
-- `src/domain/entities/Equipment.ts`
-- `src/domain/entities/Member.ts`
-- `src/domain/entities/Rental.ts`
-- `src/domain/entities/Reservation.ts`
-- `src/domain/entities/DamageAssessment.ts`
+**Files created**:
+- ✅ `src/domain/entities/Equipment.ts`
+- ✅ `src/domain/entities/Member.ts`
+- ✅ `src/domain/entities/Rental.ts`
+- ✅ `src/domain/entities/Reservation.ts`
+- ✅ `src/domain/entities/DamageAssessment.ts`
 
-**Tests to create**:
-- `src/domain/entities/__tests__/Equipment.test.ts`
-- `src/domain/entities/__tests__/Member.test.ts`
-- `src/domain/entities/__tests__/Rental.test.ts`
+**Tests created**:
+- ✅ `src/domain/entities/__tests__/Equipment.test.ts`
+- ✅ `src/domain/entities/__tests__/Member.test.ts`
+- ✅ `src/domain/entities/__tests__/Rental.test.ts`
+
+**Test Coverage**: 186 tests passing (75 new entity tests + 112 previous tests)
 
 ### 1.3 Domain Events
 Define events that represent business occurrences:
