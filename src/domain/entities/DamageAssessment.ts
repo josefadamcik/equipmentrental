@@ -57,10 +57,7 @@ export class DamageAssessment {
   /**
    * Calculate damage fee based on condition change
    */
-  private static calculateDamageFee(
-    before: EquipmentCondition,
-    after: EquipmentCondition,
-  ): Money {
+  private static calculateDamageFee(before: EquipmentCondition, after: EquipmentCondition): Money {
     const conditionOrder = [
       EquipmentCondition.EXCELLENT,
       EquipmentCondition.GOOD,

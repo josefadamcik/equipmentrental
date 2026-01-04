@@ -186,9 +186,7 @@ export class Reservation {
    * Check if reservation is ready to be fulfilled
    */
   isReadyToFulfill(now: Date = new Date()): boolean {
-    return (
-      this.props.status === ReservationStatus.CONFIRMED && this.props.period.hasStarted(now)
-    );
+    return this.props.status === ReservationStatus.CONFIRMED && this.props.period.hasStarted(now);
   }
 
   /**

@@ -137,10 +137,7 @@ export class Rental {
     damageFee: Money = Money.zero(),
     now: Date = new Date(),
   ): void {
-    if (
-      this.props.status !== RentalStatus.ACTIVE &&
-      this.props.status !== RentalStatus.OVERDUE
-    ) {
+    if (this.props.status !== RentalStatus.ACTIVE && this.props.status !== RentalStatus.OVERDUE) {
       throw new Error('Only active or overdue rentals can be returned');
     }
 
@@ -163,10 +160,7 @@ export class Rental {
    * Extend the rental period
    */
   extendPeriod(additionalDays: number, additionalCost: Money): void {
-    if (
-      this.props.status !== RentalStatus.ACTIVE &&
-      this.props.status !== RentalStatus.OVERDUE
-    ) {
+    if (this.props.status !== RentalStatus.ACTIVE && this.props.status !== RentalStatus.OVERDUE) {
       throw new Error('Only active or overdue rentals can be extended');
     }
 
