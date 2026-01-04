@@ -183,11 +183,13 @@ npm run clean
 
 ## Technology Stack
 
-- **Runtime**: Node.js
-- **Language**: TypeScript
-- **Testing**: Jest
-- **Code Quality**: ESLint, Prettier
-- **Build**: TypeScript Compiler
+- **Runtime**: Node.js (ES Modules)
+- **Language**: TypeScript 5.9+
+- **Module System**: ESM (ES Modules)
+- **Testing**: Jest with ts-jest
+- **Code Quality**: ESLint 9 (flat config), Prettier
+- **Build**: TypeScript Compiler (tsc)
+- **Dev Server**: tsx (fast TypeScript runner with watch mode)
 
 ## Future Enhancements
 
@@ -210,6 +212,11 @@ npm run clean
 ### Domain-Driven Design
 - [DDD Reference by Eric Evans](https://www.domainlanguage.com/ddd/reference/)
 - [Martin Fowler - Domain-Driven Design](https://martinfowler.com/tags/domain%20driven%20design.html)
+
+### ES Modules
+- [ESM Guide](ESM_GUIDE.md) - Project-specific ESM documentation
+- [Node.js ESM Documentation](https://nodejs.org/api/esm.html)
+- [TypeScript ESM Support](https://www.typescriptlang.org/docs/handbook/esm-node.html)
 
 ## License
 

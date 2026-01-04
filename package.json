@@ -2,10 +2,11 @@
   "name": "equipment-rental-system",
   "version": "1.0.0",
   "description": "Equipment Rental System - Hexagonal Architecture demonstration in Node.js and TypeScript",
+  "type": "module",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "dev": "nodemon --watch src --exec ts-node src/index.ts",
+    "dev": "tsx watch src/index.ts",
     "start": "node dist/index.js",
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch --passWithNoTests",
@@ -43,6 +44,7 @@
     "prettier": "^3.7.4",
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }
 }

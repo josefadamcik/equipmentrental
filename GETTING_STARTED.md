@@ -6,10 +6,12 @@ Welcome to the Equipment Rental System project! This guide will help you get sta
 
 The project has been initialized with:
 - ✅ TypeScript configuration with strict mode
+- ✅ ES Modules (ESM) - modern module system
 - ✅ Hexagonal architecture directory structure
-- ✅ ESLint for code quality
+- ✅ ESLint 9 (flat config) for code quality
 - ✅ Prettier for code formatting
-- ✅ Jest for testing
+- ✅ Jest with ESM support for testing
+- ✅ tsx for fast development with hot reload
 - ✅ Build and development scripts
 - ✅ Git repository initialized
 
@@ -17,7 +19,7 @@ The project has been initialized with:
 
 ### Development
 ```bash
-npm run dev              # Run with hot reload (nodemon + ts-node)
+npm run dev              # Run with hot reload (tsx watch mode)
 npm run build            # Compile TypeScript to JavaScript
 npm start                # Run the compiled application
 npm run clean            # Remove build artifacts
@@ -102,6 +104,7 @@ Pick one feature and implement it end-to-end:
 - [ARCHITECTURE.md](ARCHITECTURE.md) - Architecture deep dive
 - [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) - Detailed structure reference
 - [NEXT_STEPS.md](NEXT_STEPS.md) - Implementation roadmap
+- [ESM_GUIDE.md](ESM_GUIDE.md) - ES Modules guide and best practices
 
 ## 📝 Example: Creating Your First Value Object
 
@@ -166,7 +169,7 @@ touch src/domain/value-objects/__tests__/Money.test.ts
 ```typescript
 // src/domain/value-objects/__tests__/Money.test.ts
 
-import { Money } from '../Money';
+import { Money } from '../Money.js';
 
 describe('Money', () => {
   describe('creation', () => {
@@ -235,6 +238,8 @@ npm test
 ```
 
 You should see all tests passing!
+
+**Note about ESM imports:** Notice the `.js` extension in the import statement (`import { Money } from '../Money.js'`). This is required for ES modules, even though the source file is `.ts`. See [ESM_GUIDE.md](ESM_GUIDE.md) for more details.
 
 ## 🧪 Testing Strategy
 
