@@ -18,12 +18,7 @@ describe('ReservationEvents', () => {
 
   describe('ReservationCreated', () => {
     it('should create event with correct properties', () => {
-      const event = ReservationCreated.create(
-        reservationId,
-        memberId,
-        equipmentId,
-        period,
-      );
+      const event = ReservationCreated.create(reservationId, memberId, equipmentId, period);
 
       expect(event.eventType).toBe('ReservationCreated');
       expect(event.eventId).toBeDefined();
@@ -36,30 +31,15 @@ describe('ReservationEvents', () => {
     });
 
     it('should generate unique event IDs', () => {
-      const event1 = ReservationCreated.create(
-        reservationId,
-        memberId,
-        equipmentId,
-        period,
-      );
-      const event2 = ReservationCreated.create(
-        reservationId,
-        memberId,
-        equipmentId,
-        period,
-      );
+      const event1 = ReservationCreated.create(reservationId, memberId, equipmentId, period);
+      const event2 = ReservationCreated.create(reservationId, memberId, equipmentId, period);
 
       expect(event1.eventId).not.toBe(event2.eventId);
     });
 
     it('should set occurredAt to current time', () => {
       const before = new Date();
-      const event = ReservationCreated.create(
-        reservationId,
-        memberId,
-        equipmentId,
-        period,
-      );
+      const event = ReservationCreated.create(reservationId, memberId, equipmentId, period);
       const after = new Date();
 
       expect(event.occurredAt.getTime()).toBeGreaterThanOrEqual(before.getTime());
@@ -67,12 +47,7 @@ describe('ReservationEvents', () => {
     });
 
     it('should implement DomainEvent interface', () => {
-      const event = ReservationCreated.create(
-        reservationId,
-        memberId,
-        equipmentId,
-        period,
-      );
+      const event = ReservationCreated.create(reservationId, memberId, equipmentId, period);
 
       expect(event.eventId).toBeDefined();
       expect(event.occurredAt).toBeInstanceOf(Date);
@@ -81,12 +56,7 @@ describe('ReservationEvents', () => {
     });
 
     it('should preserve period details', () => {
-      const event = ReservationCreated.create(
-        reservationId,
-        memberId,
-        equipmentId,
-        period,
-      );
+      const event = ReservationCreated.create(reservationId, memberId, equipmentId, period);
 
       expect(event.period.start).toEqual(period.start);
       expect(event.period.end).toEqual(period.end);
@@ -98,11 +68,7 @@ describe('ReservationEvents', () => {
     it('should create event with reason', () => {
       const reason = 'Customer request';
 
-      const event = ReservationCancelled.create(
-        reservationId,
-        memberId,
-        reason,
-      );
+      const event = ReservationCancelled.create(reservationId, memberId, reason);
 
       expect(event.eventType).toBe('ReservationCancelled');
       expect(event.eventId).toBeDefined();
@@ -114,10 +80,7 @@ describe('ReservationEvents', () => {
     });
 
     it('should create event without reason', () => {
-      const event = ReservationCancelled.create(
-        reservationId,
-        memberId,
-      );
+      const event = ReservationCancelled.create(reservationId, memberId);
 
       expect(event.eventType).toBe('ReservationCancelled');
       expect(event.reservationId).toBe(reservationId);
@@ -134,38 +97,22 @@ describe('ReservationEvents', () => {
       ];
 
       reasons.forEach((reason) => {
-        const event = ReservationCancelled.create(
-          reservationId,
-          memberId,
-          reason,
-        );
+        const event = ReservationCancelled.create(reservationId, memberId, reason);
 
         expect(event.reason).toBe(reason);
       });
     });
 
     it('should generate unique event IDs', () => {
-      const event1 = ReservationCancelled.create(
-        reservationId,
-        memberId,
-        'Reason 1',
-      );
-      const event2 = ReservationCancelled.create(
-        reservationId,
-        memberId,
-        'Reason 2',
-      );
+      const event1 = ReservationCancelled.create(reservationId, memberId, 'Reason 1');
+      const event2 = ReservationCancelled.create(reservationId, memberId, 'Reason 2');
 
       expect(event1.eventId).not.toBe(event2.eventId);
     });
 
     it('should set occurredAt to current time', () => {
       const before = new Date();
-      const event = ReservationCancelled.create(
-        reservationId,
-        memberId,
-        'Test reason',
-      );
+      const event = ReservationCancelled.create(reservationId, memberId, 'Test reason');
       const after = new Date();
 
       expect(event.occurredAt.getTime()).toBeGreaterThanOrEqual(before.getTime());
@@ -173,11 +120,7 @@ describe('ReservationEvents', () => {
     });
 
     it('should implement DomainEvent interface', () => {
-      const event = ReservationCancelled.create(
-        reservationId,
-        memberId,
-        'Test reason',
-      );
+      const event = ReservationCancelled.create(reservationId, memberId, 'Test reason');
 
       expect(event.eventId).toBeDefined();
       expect(event.occurredAt).toBeInstanceOf(Date);

@@ -21,13 +21,7 @@ describe('RentalEvents', () => {
 
   describe('RentalCreated', () => {
     it('should create event with correct properties', () => {
-      const event = RentalCreated.create(
-        rentalId,
-        memberId,
-        equipmentId,
-        period,
-        dailyRate,
-      );
+      const event = RentalCreated.create(rentalId, memberId, equipmentId, period, dailyRate);
 
       expect(event.eventType).toBe('RentalCreated');
       expect(event.eventId).toBeDefined();
@@ -41,33 +35,15 @@ describe('RentalEvents', () => {
     });
 
     it('should generate unique event IDs', () => {
-      const event1 = RentalCreated.create(
-        rentalId,
-        memberId,
-        equipmentId,
-        period,
-        dailyRate,
-      );
-      const event2 = RentalCreated.create(
-        rentalId,
-        memberId,
-        equipmentId,
-        period,
-        dailyRate,
-      );
+      const event1 = RentalCreated.create(rentalId, memberId, equipmentId, period, dailyRate);
+      const event2 = RentalCreated.create(rentalId, memberId, equipmentId, period, dailyRate);
 
       expect(event1.eventId).not.toBe(event2.eventId);
     });
 
     it('should set occurredAt to current time', () => {
       const before = new Date();
-      const event = RentalCreated.create(
-        rentalId,
-        memberId,
-        equipmentId,
-        period,
-        dailyRate,
-      );
+      const event = RentalCreated.create(rentalId, memberId, equipmentId, period, dailyRate);
       const after = new Date();
 
       expect(event.occurredAt.getTime()).toBeGreaterThanOrEqual(before.getTime());
@@ -75,13 +51,7 @@ describe('RentalEvents', () => {
     });
 
     it('should implement DomainEvent interface', () => {
-      const event = RentalCreated.create(
-        rentalId,
-        memberId,
-        equipmentId,
-        period,
-        dailyRate,
-      );
+      const event = RentalCreated.create(rentalId, memberId, equipmentId, period, dailyRate);
 
       expect(event.eventId).toBeDefined();
       expect(event.occurredAt).toBeInstanceOf(Date);
@@ -96,12 +66,7 @@ describe('RentalEvents', () => {
       const lateFees = Money.dollars(25);
       const totalCost = Money.dollars(225);
 
-      const event = RentalReturned.create(
-        rentalId,
-        returnedAt,
-        lateFees,
-        totalCost,
-      );
+      const event = RentalReturned.create(rentalId, returnedAt, lateFees, totalCost);
 
       expect(event.eventType).toBe('RentalReturned');
       expect(event.eventId).toBeDefined();
@@ -118,12 +83,7 @@ describe('RentalEvents', () => {
       const lateFees = Money.zero();
       const totalCost = Money.dollars(200);
 
-      const event = RentalReturned.create(
-        rentalId,
-        returnedAt,
-        lateFees,
-        totalCost,
-      );
+      const event = RentalReturned.create(rentalId, returnedAt, lateFees, totalCost);
 
       expect(event.lateFees.equals(Money.zero())).toBe(true);
     });
@@ -133,18 +93,8 @@ describe('RentalEvents', () => {
       const lateFees = Money.dollars(25);
       const totalCost = Money.dollars(225);
 
-      const event1 = RentalReturned.create(
-        rentalId,
-        returnedAt,
-        lateFees,
-        totalCost,
-      );
-      const event2 = RentalReturned.create(
-        rentalId,
-        returnedAt,
-        lateFees,
-        totalCost,
-      );
+      const event1 = RentalReturned.create(rentalId, returnedAt, lateFees, totalCost);
+      const event2 = RentalReturned.create(rentalId, returnedAt, lateFees, totalCost);
 
       expect(event1.eventId).not.toBe(event2.eventId);
     });
@@ -154,12 +104,7 @@ describe('RentalEvents', () => {
       const lateFees = Money.dollars(25);
       const totalCost = Money.dollars(225);
 
-      const event = RentalReturned.create(
-        rentalId,
-        returnedAt,
-        lateFees,
-        totalCost,
-      );
+      const event = RentalReturned.create(rentalId, returnedAt, lateFees, totalCost);
 
       expect(event.eventId).toBeDefined();
       expect(event.occurredAt).toBeInstanceOf(Date);

@@ -124,7 +124,8 @@ describe('EquipmentEvents', () => {
     });
 
     it('should preserve detailed damage descriptions', () => {
-      const detailedDescription = 'Deep scratch on left side panel (3 inches), dent on top corner (1 inch diameter), missing protective cap';
+      const detailedDescription =
+        'Deep scratch on left side panel (3 inches), dent on top corner (1 inch diameter), missing protective cap';
 
       const event = EquipmentDamaged.create(
         equipmentId,
