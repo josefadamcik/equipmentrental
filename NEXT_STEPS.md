@@ -97,24 +97,36 @@ Create specific exception types for business rule violations:
 
 **Test Coverage**: 318 tests passing (82 new exception tests)
 
-### 1.5 Ports (Interfaces)
+### 1.5 Ports (Interfaces) ✅ COMPLETED
 Define contracts for external dependencies:
 
-- [ ] `EquipmentRepository`
-- [ ] `MemberRepository`
-- [ ] `RentalRepository`
-- [ ] `ReservationRepository`
-- [ ] `PaymentService`
-- [ ] `NotificationService`
-- [ ] `EventPublisher`
+- [x] `EquipmentRepository`
+- [x] `MemberRepository`
+- [x] `RentalRepository`
+- [x] `ReservationRepository`
+- [x] `PaymentService`
+- [x] `NotificationService`
+- [x] `EventPublisher`
 
-**Files to create**:
-- `src/domain/ports/EquipmentRepository.ts`
-- `src/domain/ports/MemberRepository.ts`
-- `src/domain/ports/RentalRepository.ts`
-- `src/domain/ports/PaymentService.ts`
-- `src/domain/ports/NotificationService.ts`
-- `src/domain/ports/EventPublisher.ts`
+**Files created**:
+- ✅ `src/domain/ports/EquipmentRepository.ts`
+- ✅ `src/domain/ports/MemberRepository.ts`
+- ✅ `src/domain/ports/RentalRepository.ts`
+- ✅ `src/domain/ports/ReservationRepository.ts`
+- ✅ `src/domain/ports/PaymentService.ts`
+- ✅ `src/domain/ports/NotificationService.ts`
+- ✅ `src/domain/ports/EventPublisher.ts`
+
+**Tests created**:
+- ✅ `src/domain/ports/__tests__/EquipmentRepository.test.ts`
+- ✅ `src/domain/ports/__tests__/MemberRepository.test.ts`
+- ✅ `src/domain/ports/__tests__/RentalRepository.test.ts`
+- ✅ `src/domain/ports/__tests__/ReservationRepository.test.ts`
+- ✅ `src/domain/ports/__tests__/PaymentService.test.ts`
+- ✅ `src/domain/ports/__tests__/NotificationService.test.ts`
+- ✅ `src/domain/ports/__tests__/EventPublisher.test.ts`
+
+**Test Coverage**: 464 tests passing (146 new port tests + 318 previous tests)
 
 ## Phase 2: Application Layer
 
