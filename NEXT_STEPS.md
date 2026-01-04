@@ -130,26 +130,30 @@ Define contracts for external dependencies:
 
 ## Phase 2: Application Layer
 
-### 2.1 Command Handlers (Write Operations)
+### 2.1 Command Handlers (Write Operations) ✅ COMPLETED
 Implement use cases that change state:
 
-- [ ] `CreateRentalCommandHandler` - Start a new rental
-- [ ] `ReturnRentalCommandHandler` - Return equipment
-- [ ] `ExtendRentalCommandHandler` - Extend rental period
-- [ ] `CreateReservationCommandHandler` - Make a reservation
-- [ ] `CancelReservationCommandHandler` - Cancel a reservation
-- [ ] `AssessDamageCommandHandler` - Evaluate equipment condition
+- [x] `CreateRentalCommandHandler` - Start a new rental
+- [x] `ReturnRentalCommandHandler` - Return equipment
+- [x] `ExtendRentalCommandHandler` - Extend rental period
+- [x] `CreateReservationCommandHandler` - Make a reservation
+- [x] `CancelReservationCommandHandler` - Cancel a reservation
+- [x] `AssessDamageCommandHandler` - Evaluate equipment condition
 
-**Files to create**:
-- `src/application/commands/rental/CreateRentalCommand.ts`
-- `src/application/commands/rental/ReturnRentalCommand.ts`
-- `src/application/commands/rental/ExtendRentalCommand.ts`
-- `src/application/commands/reservation/CreateReservationCommand.ts`
-- `src/application/commands/reservation/CancelReservationCommand.ts`
+**Files created**:
+- ✅ `src/application/commands/rental/CreateRentalCommand.ts`
+- ✅ `src/application/commands/rental/ReturnRentalCommand.ts`
+- ✅ `src/application/commands/rental/ExtendRentalCommand.ts`
+- ✅ `src/application/commands/reservation/CreateReservationCommand.ts`
+- ✅ `src/application/commands/reservation/CancelReservationCommand.ts`
+- ✅ `src/application/commands/damage/AssessDamageCommand.ts`
 
-**Tests to create**:
-- `src/application/commands/__tests__/CreateRentalCommandHandler.test.ts`
-- Use in-memory repositories for testing
+**Tests created**:
+- ✅ `src/application/commands/__tests__/CreateRentalCommandHandler.test.ts`
+- ✅ `src/application/commands/__tests__/ReturnRentalCommandHandler.test.ts`
+- ✅ `src/application/commands/__tests__/CommandHandlers.test.ts`
+
+**Test Coverage**: 483 tests passing (19 new command handler tests + 464 previous tests)
 
 ### 2.2 Query Handlers (Read Operations)
 Implement use cases that fetch data:

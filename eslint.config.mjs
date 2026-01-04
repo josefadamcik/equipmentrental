@@ -25,6 +25,7 @@ export default [
         __filename: 'readonly',
         module: 'readonly',
         require: 'readonly',
+        crypto: 'readonly',
       },
     },
     plugins: {
