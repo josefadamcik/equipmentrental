@@ -1,61 +1,61 @@
-import { EquipmentCondition } from '../EquipmentCondition.js';
+import { EquipmentCondition, isRentable, needsRepair, getEquipmentConditionValues } from '../EquipmentCondition.js';
 
 describe('EquipmentCondition', () => {
   describe('isRentable', () => {
     it('should return true for EXCELLENT condition', () => {
-      expect(EquipmentCondition.isRentable(EquipmentCondition.EXCELLENT)).toBe(true);
+      expect(isRentable(EquipmentCondition.EXCELLENT)).toBe(true);
     });
 
     it('should return true for GOOD condition', () => {
-      expect(EquipmentCondition.isRentable(EquipmentCondition.GOOD)).toBe(true);
+      expect(isRentable(EquipmentCondition.GOOD)).toBe(true);
     });
 
     it('should return true for FAIR condition', () => {
-      expect(EquipmentCondition.isRentable(EquipmentCondition.FAIR)).toBe(true);
+      expect(isRentable(EquipmentCondition.FAIR)).toBe(true);
     });
 
     it('should return false for POOR condition', () => {
-      expect(EquipmentCondition.isRentable(EquipmentCondition.POOR)).toBe(false);
+      expect(isRentable(EquipmentCondition.POOR)).toBe(false);
     });
 
     it('should return false for DAMAGED condition', () => {
-      expect(EquipmentCondition.isRentable(EquipmentCondition.DAMAGED)).toBe(false);
+      expect(isRentable(EquipmentCondition.DAMAGED)).toBe(false);
     });
 
     it('should return false for UNDER_REPAIR condition', () => {
-      expect(EquipmentCondition.isRentable(EquipmentCondition.UNDER_REPAIR)).toBe(false);
+      expect(isRentable(EquipmentCondition.UNDER_REPAIR)).toBe(false);
     });
   });
 
   describe('needsRepair', () => {
     it('should return true for DAMAGED condition', () => {
-      expect(EquipmentCondition.needsRepair(EquipmentCondition.DAMAGED)).toBe(true);
+      expect(needsRepair(EquipmentCondition.DAMAGED)).toBe(true);
     });
 
     it('should return true for UNDER_REPAIR condition', () => {
-      expect(EquipmentCondition.needsRepair(EquipmentCondition.UNDER_REPAIR)).toBe(true);
+      expect(needsRepair(EquipmentCondition.UNDER_REPAIR)).toBe(true);
     });
 
     it('should return false for EXCELLENT condition', () => {
-      expect(EquipmentCondition.needsRepair(EquipmentCondition.EXCELLENT)).toBe(false);
+      expect(needsRepair(EquipmentCondition.EXCELLENT)).toBe(false);
     });
 
     it('should return false for GOOD condition', () => {
-      expect(EquipmentCondition.needsRepair(EquipmentCondition.GOOD)).toBe(false);
+      expect(needsRepair(EquipmentCondition.GOOD)).toBe(false);
     });
 
     it('should return false for FAIR condition', () => {
-      expect(EquipmentCondition.needsRepair(EquipmentCondition.FAIR)).toBe(false);
+      expect(needsRepair(EquipmentCondition.FAIR)).toBe(false);
     });
 
     it('should return false for POOR condition', () => {
-      expect(EquipmentCondition.needsRepair(EquipmentCondition.POOR)).toBe(false);
+      expect(needsRepair(EquipmentCondition.POOR)).toBe(false);
     });
   });
 
-  describe('values', () => {
+  describe('getEquipmentConditionValues', () => {
     it('should return all condition values', () => {
-      const values = EquipmentCondition.values();
+      const values = getEquipmentConditionValues();
 
       expect(values).toContain(EquipmentCondition.EXCELLENT);
       expect(values).toContain(EquipmentCondition.GOOD);
