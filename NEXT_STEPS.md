@@ -55,15 +55,15 @@ Build core business entities with rich behavior:
 
 **Test Coverage**: 186 tests passing (75 new entity tests + 112 previous tests)
 
-### 1.3 Domain Events
+### 1.3 Domain Events ✅ COMPLETED
 Define events that represent business occurrences:
 
-- [ ] `RentalCreated`
-- [ ] `RentalReturned`
-- [ ] `RentalOverdue`
-- [ ] `ReservationCreated`
-- [ ] `ReservationCancelled`
-- [ ] `EquipmentDamaged`
+- [x] `RentalCreated`
+- [x] `RentalReturned`
+- [x] `RentalOverdue`
+- [x] `ReservationCreated`
+- [x] `ReservationCancelled`
+- [x] `EquipmentDamaged`
 
 **Files to create**:
 - `src/domain/events/RentalEvents.ts`
@@ -71,20 +71,31 @@ Define events that represent business occurrences:
 - `src/domain/events/EquipmentEvents.ts`
 - `src/domain/events/DomainEvent.ts` (base interface)
 
-### 1.4 Domain Exceptions
+### 1.4 Domain Exceptions ✅ COMPLETED
 Create specific exception types for business rule violations:
 
-- [ ] `RentalNotAllowedError`
-- [ ] `EquipmentNotAvailableError`
-- [ ] `InvalidStateTransitionError`
-- [ ] `EquipmentNotFoundError`
-- [ ] `MemberNotFoundError`
+- [x] `RentalNotAllowedError`
+- [x] `EquipmentNotAvailableError`
+- [x] `InvalidStateTransitionError`
+- [x] `EquipmentNotFoundError`
+- [x] `MemberNotFoundError`
+- [x] Additional exceptions: `RentalAlreadyReturnedError`, `InvalidRentalExtensionError`, `OverdueRentalError`
+- [x] Additional exceptions: `EquipmentAlreadyRentedError`, `EquipmentInMaintenanceError`, `EquipmentConditionUnacceptableError`, `EquipmentRetiredError`
+- [x] Additional exceptions: `MemberSuspendedError`, `RentalLimitExceededError`, `MemberHasOverdueRentalsError`, `MemberInactiveError`, `InsufficientMemberTierError`
 
-**Files to create**:
-- `src/domain/exceptions/RentalExceptions.ts`
-- `src/domain/exceptions/EquipmentExceptions.ts`
-- `src/domain/exceptions/MemberExceptions.ts`
-- `src/domain/exceptions/DomainException.ts` (base class)
+**Files created**:
+- ✅ `src/domain/exceptions/RentalExceptions.ts`
+- ✅ `src/domain/exceptions/EquipmentExceptions.ts`
+- ✅ `src/domain/exceptions/MemberExceptions.ts`
+- ✅ `src/domain/exceptions/DomainException.ts` (base class)
+
+**Tests created**:
+- ✅ `src/domain/exceptions/__tests__/DomainException.test.ts`
+- ✅ `src/domain/exceptions/__tests__/RentalExceptions.test.ts`
+- ✅ `src/domain/exceptions/__tests__/EquipmentExceptions.test.ts`
+- ✅ `src/domain/exceptions/__tests__/MemberExceptions.test.ts`
+
+**Test Coverage**: 318 tests passing (82 new exception tests)
 
 ### 1.5 Ports (Interfaces)
 Define contracts for external dependencies:
