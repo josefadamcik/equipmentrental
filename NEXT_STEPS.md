@@ -155,19 +155,26 @@ Implement use cases that change state:
 
 **Test Coverage**: 483 tests passing (19 new command handler tests + 464 previous tests)
 
-### 2.2 Query Handlers (Read Operations)
+### 2.2 Query Handlers (Read Operations) ✅ COMPLETED
 Implement use cases that fetch data:
 
-- [ ] `GetAvailableEquipmentQueryHandler`
-- [ ] `GetRentalQueryHandler`
-- [ ] `GetMemberRentalsQueryHandler`
-- [ ] `GetOverdueRentalsQueryHandler`
-- [ ] `GetEquipmentMaintenanceScheduleQueryHandler`
+- [x] `GetAvailableEquipmentQueryHandler`
+- [x] `GetRentalQueryHandler`
+- [x] `GetMemberRentalsQueryHandler`
+- [x] `GetOverdueRentalsQueryHandler`
+- [x] `GetEquipmentMaintenanceScheduleQueryHandler`
 
-**Files to create**:
-- `src/application/queries/GetAvailableEquipmentQuery.ts`
-- `src/application/queries/GetRentalQuery.ts`
-- `src/application/queries/GetMemberRentalsQuery.ts`
+**Files created**:
+- ✅ `src/application/queries/GetAvailableEquipmentQuery.ts`
+- ✅ `src/application/queries/GetRentalQuery.ts`
+- ✅ `src/application/queries/GetMemberRentalsQuery.ts`
+- ✅ `src/application/queries/GetOverdueRentalsQuery.ts`
+- ✅ `src/application/queries/GetEquipmentMaintenanceScheduleQuery.ts`
+
+**Tests created**:
+- ✅ `src/application/queries/__tests__/QueryHandlers.test.ts`
+
+**Test Coverage**: 503 tests passing (20 new query handler tests + 483 previous tests)
 
 ### 2.3 Application Services
 Orchestrate complex workflows:
