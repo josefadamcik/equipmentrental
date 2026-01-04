@@ -1,0 +1,398 @@
+# Next Steps
+
+This document outlines the recommended implementation steps for building the Equipment Rental System using hexagonal architecture.
+
+## Phase 1: Core Domain Layer
+
+### 1.1 Value Objects
+Create immutable value objects that encapsulate validation and behavior:
+
+- [ ] `Money` - Monetary amounts with arithmetic operations
+- [ ] `DateRange` - Period with overlap detection and validation
+- [ ] `EquipmentId`, `RentalId`, `MemberId` - Strongly-typed identifiers
+- [ ] `EquipmentCondition` - Enum/value object for condition states
+- [ ] `RentalStatus` - Enum for rental lifecycle states
+- [ ] `MembershipTier` - Enum/value object for tier levels
+
+**Files to create**:
+- `src/domain/value-objects/Money.ts`
+- `src/domain/value-objects/DateRange.ts`
+- `src/domain/value-objects/identifiers.ts`
+- `src/domain/types/EquipmentCondition.ts`
+- `src/domain/types/RentalStatus.ts`
+- `src/domain/types/MembershipTier.ts`
+
+**Tests to create**:
+- `src/domain/value-objects/__tests__/Money.test.ts`
+- `src/domain/value-objects/__tests__/DateRange.test.ts`
+
+### 1.2 Domain Entities
+Build core business entities with rich behavior:
+
+- [ ] `Equipment` - Rental items with availability tracking
+- [ ] `Member` - Customers with tier-based rules
+- [ ] `Rental` - Central aggregate managing rental lifecycle
+- [ ] `Reservation` - Future booking system
+- [ ] `DamageAssessment` - Condition evaluation on return
+
+**Files to create**:
+- `src/domain/entities/Equipment.ts`
+- `src/domain/entities/Member.ts`
+- `src/domain/entities/Rental.ts`
+- `src/domain/entities/Reservation.ts`
+- `src/domain/entities/DamageAssessment.ts`
+
+**Tests to create**:
+- `src/domain/entities/__tests__/Equipment.test.ts`
+- `src/domain/entities/__tests__/Member.test.ts`
+- `src/domain/entities/__tests__/Rental.test.ts`
+
+### 1.3 Domain Events
+Define events that represent business occurrences:
+
+- [ ] `RentalCreated`
+- [ ] `RentalReturned`
+- [ ] `RentalOverdue`
+- [ ] `ReservationCreated`
+- [ ] `ReservationCancelled`
+- [ ] `EquipmentDamaged`
+
+**Files to create**:
+- `src/domain/events/RentalEvents.ts`
+- `src/domain/events/ReservationEvents.ts`
+- `src/domain/events/EquipmentEvents.ts`
+- `src/domain/events/DomainEvent.ts` (base interface)
+
+### 1.4 Domain Exceptions
+Create specific exception types for business rule violations:
+
+- [ ] `RentalNotAllowedError`
+- [ ] `EquipmentNotAvailableError`
+- [ ] `InvalidStateTransitionError`
+- [ ] `EquipmentNotFoundError`
+- [ ] `MemberNotFoundError`
+
+**Files to create**:
+- `src/domain/exceptions/RentalExceptions.ts`
+- `src/domain/exceptions/EquipmentExceptions.ts`
+- `src/domain/exceptions/MemberExceptions.ts`
+- `src/domain/exceptions/DomainException.ts` (base class)
+
+### 1.5 Ports (Interfaces)
+Define contracts for external dependencies:
+
+- [ ] `EquipmentRepository`
+- [ ] `MemberRepository`
+- [ ] `RentalRepository`
+- [ ] `ReservationRepository`
+- [ ] `PaymentService`
+- [ ] `NotificationService`
+- [ ] `EventPublisher`
+
+**Files to create**:
+- `src/domain/ports/EquipmentRepository.ts`
+- `src/domain/ports/MemberRepository.ts`
+- `src/domain/ports/RentalRepository.ts`
+- `src/domain/ports/PaymentService.ts`
+- `src/domain/ports/NotificationService.ts`
+- `src/domain/ports/EventPublisher.ts`
+
+## Phase 2: Application Layer
+
+### 2.1 Command Handlers (Write Operations)
+Implement use cases that change state:
+
+- [ ] `CreateRentalCommandHandler` - Start a new rental
+- [ ] `ReturnRentalCommandHandler` - Return equipment
+- [ ] `ExtendRentalCommandHandler` - Extend rental period
+- [ ] `CreateReservationCommandHandler` - Make a reservation
+- [ ] `CancelReservationCommandHandler` - Cancel a reservation
+- [ ] `AssessDamageCommandHandler` - Evaluate equipment condition
+
+**Files to create**:
+- `src/application/commands/rental/CreateRentalCommand.ts`
+- `src/application/commands/rental/ReturnRentalCommand.ts`
+- `src/application/commands/rental/ExtendRentalCommand.ts`
+- `src/application/commands/reservation/CreateReservationCommand.ts`
+- `src/application/commands/reservation/CancelReservationCommand.ts`
+
+**Tests to create**:
+- `src/application/commands/__tests__/CreateRentalCommandHandler.test.ts`
+- Use in-memory repositories for testing
+
+### 2.2 Query Handlers (Read Operations)
+Implement use cases that fetch data:
+
+- [ ] `GetAvailableEquipmentQueryHandler`
+- [ ] `GetRentalQueryHandler`
+- [ ] `GetMemberRentalsQueryHandler`
+- [ ] `GetOverdueRentalsQueryHandler`
+- [ ] `GetEquipmentMaintenanceScheduleQueryHandler`
+
+**Files to create**:
+- `src/application/queries/GetAvailableEquipmentQuery.ts`
+- `src/application/queries/GetRentalQuery.ts`
+- `src/application/queries/GetMemberRentalsQuery.ts`
+
+### 2.3 Application Services
+Orchestrate complex workflows:
+
+- [ ] `RentalService` - Coordinates rental operations
+- [ ] `ReservationService` - Manages reservation lifecycle
+- [ ] `NotificationService` - Handles notification logic
+
+**Files to create**:
+- `src/application/services/RentalService.ts`
+- `src/application/services/ReservationService.ts`
+
+## Phase 3: Adapters Layer
+
+### 3.1 In-Memory Adapters (for testing)
+Create simple implementations for testing:
+
+- [ ] `InMemoryEquipmentRepository`
+- [ ] `InMemoryMemberRepository`
+- [ ] `InMemoryRentalRepository`
+- [ ] `MockPaymentService`
+- [ ] `InMemoryEventPublisher`
+
+**Files to create**:
+- `src/adapters/outbound/persistence/InMemoryEquipmentRepository.ts`
+- `src/adapters/outbound/persistence/InMemoryMemberRepository.ts`
+- `src/adapters/outbound/persistence/InMemoryRentalRepository.ts`
+- `src/adapters/outbound/payment/MockPaymentService.ts`
+
+### 3.2 Database Adapters
+Choose and implement a real database adapter:
+
+**Option A: Prisma**
+- [ ] Install Prisma: `npm install prisma @prisma/client`
+- [ ] Initialize Prisma: `npx prisma init`
+- [ ] Define schema in `prisma/schema.prisma`
+- [ ] Create migrations
+- [ ] Implement repository adapters
+
+**Option B: TypeORM**
+- [ ] Install TypeORM: `npm install typeorm reflect-metadata`
+- [ ] Define entity schemas
+- [ ] Create migrations
+- [ ] Implement repository adapters
+
+**Files to create** (Prisma example):
+- `prisma/schema.prisma`
+- `src/adapters/outbound/persistence/PrismaEquipmentRepository.ts`
+- `src/adapters/outbound/persistence/PrismaMemberRepository.ts`
+- `src/adapters/outbound/persistence/PrismaRentalRepository.ts`
+
+### 3.3 Payment Service Adapters
+Implement payment gateway integration:
+
+- [ ] `StripePaymentService` - Real Stripe integration
+- [ ] Or keep `MockPaymentService` for demo purposes
+
+**Files to create**:
+- `src/adapters/outbound/payment/StripePaymentService.ts`
+
+### 3.4 Notification Adapters
+Implement notification delivery:
+
+- [ ] `EmailNotificationService` - Send emails
+- [ ] `ConsoleNotificationService` - Log to console (for testing)
+
+**Files to create**:
+- `src/adapters/outbound/notification/EmailNotificationService.ts`
+- `src/adapters/outbound/notification/ConsoleNotificationService.ts`
+
+### 3.5 HTTP Controllers (REST API)
+Choose a web framework and implement controllers:
+
+**Option A: Express**
+```bash
+npm install express @types/express
+```
+
+**Option B: Fastify**
+```bash
+npm install fastify
+```
+
+**Option C: NestJS** (includes DI container)
+```bash
+npm install @nestjs/core @nestjs/common @nestjs/platform-express
+```
+
+**Controllers to create**:
+- [ ] `RentalController` - CRUD operations for rentals
+- [ ] `EquipmentController` - Equipment management
+- [ ] `MemberController` - Member operations
+- [ ] `ReservationController` - Reservation handling
+
+**Files to create** (Express example):
+- `src/adapters/inbound/http/server.ts`
+- `src/adapters/inbound/http/controllers/RentalController.ts`
+- `src/adapters/inbound/http/controllers/EquipmentController.ts`
+- `src/adapters/inbound/http/controllers/MemberController.ts`
+- `src/adapters/inbound/http/middleware/errorHandler.ts`
+
+## Phase 4: Infrastructure Layer
+
+### 4.1 Dependency Injection Container
+Wire all components together:
+
+- [ ] Create container that registers all dependencies
+- [ ] Map interfaces to implementations
+- [ ] Provide factory methods for use cases
+
+**Files to create**:
+- `src/infrastructure/di/Container.ts`
+- `src/infrastructure/di/types.ts` (DI tokens)
+
+**Alternative**: Use a DI library like `tsyringe` or `inversify`
+
+### 4.2 Configuration Management
+Handle environment-specific settings:
+
+- [ ] Database connection strings
+- [ ] Payment API keys
+- [ ] Server port and host
+- [ ] Logging levels
+
+**Files to create**:
+- `src/infrastructure/config/Config.ts`
+- `src/infrastructure/config/DatabaseConfig.ts`
+- `src/infrastructure/config/ServerConfig.ts`
+- `.env.example`
+
+### 4.3 Logging
+Set up structured logging:
+
+- [ ] Choose logger (Winston, Pino, or built-in console)
+- [ ] Configure log levels
+- [ ] Add request logging middleware
+
+**Files to create**:
+- `src/infrastructure/logging/Logger.ts`
+- `src/infrastructure/logging/RequestLogger.ts`
+
+### 4.4 Application Bootstrap
+Initialize and start the application:
+
+- [ ] Load configuration
+- [ ] Initialize database connections
+- [ ] Register dependencies in DI container
+- [ ] Start HTTP server
+- [ ] Set up graceful shutdown
+
+**Update**:
+- `src/index.ts` - Main entry point
+
+## Phase 5: Testing
+
+### 5.1 Unit Tests
+Test domain logic in isolation:
+
+- [ ] Test all value objects
+- [ ] Test all entities
+- [ ] Test business rule enforcement
+- [ ] Test state transitions
+
+### 5.2 Integration Tests
+Test use cases with in-memory adapters:
+
+- [ ] Test command handlers
+- [ ] Test query handlers
+- [ ] Test application services
+
+### 5.3 End-to-End Tests
+Test complete flows through HTTP endpoints:
+
+- [ ] Test rental creation flow
+- [ ] Test return flow with late fees
+- [ ] Test reservation system
+- [ ] Test error scenarios
+
+**Install testing tools**:
+```bash
+npm install --save-dev supertest @types/supertest
+```
+
+## Phase 6: Documentation and Deployment
+
+### 6.1 API Documentation
+Document the REST API:
+
+- [ ] Use Swagger/OpenAPI
+- [ ] Document all endpoints
+- [ ] Provide example requests/responses
+
+**Install tools**:
+```bash
+npm install swagger-ui-express @types/swagger-ui-express
+```
+
+### 6.2 Docker Setup
+Containerize the application:
+
+- [ ] Create `Dockerfile`
+- [ ] Create `docker-compose.yml` with database
+- [ ] Set up development and production configurations
+
+### 6.3 CI/CD Pipeline
+Automate testing and deployment:
+
+- [ ] Set up GitHub Actions or similar
+- [ ] Run tests on push
+- [ ] Run linting and type checking
+- [ ] Build and deploy
+
+## Recommended Implementation Order
+
+1. **Start with Value Objects** - They have no dependencies
+2. **Build Domain Entities** - Using the value objects
+3. **Define Ports** - Establish contracts
+4. **Create In-Memory Adapters** - For testing
+5. **Implement Use Cases** - Test with in-memory adapters
+6. **Add Real Adapters** - Database, HTTP, etc.
+7. **Wire Everything Together** - DI container and bootstrap
+8. **Add End-to-End Tests** - Verify complete flows
+
+## Development Commands
+
+```bash
+# Development
+npm run dev              # Run with hot reload
+
+# Testing
+npm test                 # Run all tests
+npm run test:watch       # Run tests in watch mode
+npm run test:coverage    # Generate coverage report
+
+# Code Quality
+npm run lint             # Check for linting errors
+npm run lint:fix         # Auto-fix linting errors
+npm run format           # Format code with Prettier
+npm run typecheck        # Run TypeScript type checking
+
+# Build
+npm run build            # Compile TypeScript
+npm start                # Run production build
+npm run clean            # Remove build artifacts
+```
+
+## Tips
+
+1. **Test-Driven Development**: Write tests first, especially for domain logic
+2. **Small Commits**: Commit after each completed component
+3. **Port First**: Define interfaces before implementations
+4. **Domain Focus**: Keep business logic in the domain layer
+5. **Vertical Slices**: Implement one feature end-to-end before moving to the next
+6. **Documentation**: Update architecture docs as patterns emerge
+
+## Questions to Consider
+
+- Which database will you use? (PostgreSQL, MySQL, MongoDB)
+- Which web framework? (Express, Fastify, NestJS)
+- Will you integrate real payment gateway or use mocks?
+- Do you need authentication/authorization?
+- Will you implement a GraphQL API in addition to REST?
+- Do you need event sourcing or CQRS patterns?
