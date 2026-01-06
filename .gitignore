@@ -33,3 +33,5 @@ yarn-error.log*
 # Temp files
 tmp/
 temp/
+
+/src/generated/prisma

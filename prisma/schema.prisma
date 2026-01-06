@@ -1,0 +1,138 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// Equipment model - represents rental items
+model Equipment {
+  id                    String        @id
+  name                  String
+  description           String
+  category              String
+  dailyRateAmount       Float
+  dailyRateCurrency     String        @default("USD")
+  condition             String        // EXCELLENT, GOOD, FAIR, POOR, DAMAGED, UNDER_REPAIR
+  isAvailable           Boolean       @default(true)
+  currentRentalId       String?
+  purchaseDate          DateTime
+  lastMaintenanceDate   DateTime?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  rentals               Rental[]
+  reservations          Reservation[]
+  damageAssessments     DamageAssessment[]
+
+  @@index([category])
+  @@index([isAvailable])
+  @@index([condition])
+}
+
+// Member model - represents customers
+model Member {
+  id                    String        @id
+  name                  String
+  email                 String        @unique
+  tier                  String        // BASIC, SILVER, GOLD, PLATINUM
+  isActive              Boolean       @default(true)
+  activeRentalCount     Int           @default(0)
+  totalRentalCount      Int           @default(0)
+  joinDate              DateTime      @default(now())
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  rentals               Rental[]
+  reservations          Reservation[]
+
+  @@index([email])
+  @@index([tier])
+  @@index([isActive])
+}
+
+// Rental model - represents active and completed rentals
+model Rental {
+  id                    String        @id
+  equipmentId           String
+  memberId              String
+  startDate             DateTime
+  endDate               DateTime
+  status                String        // RESERVED, ACTIVE, OVERDUE, RETURNED, CANCELLED
+  baseCostAmount        Float
+  baseCostCurrency      String        @default("USD")
+  lateFeeAmount         Float         @default(0)
+  lateFeeCurrency       String        @default("USD")
+  totalCostAmount       Float
+  totalCostCurrency     String        @default("USD")
+  conditionAtStart      String
+  conditionAtReturn     String?
+  returnedAt            DateTime?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  equipment             Equipment     @relation(fields: [equipmentId], references: [id])
+  member                Member        @relation(fields: [memberId], references: [id])
+  damageAssessments     DamageAssessment[]
+
+  @@index([equipmentId])
+  @@index([memberId])
+  @@index([status])
+  @@index([startDate])
+  @@index([endDate])
+  @@index([returnedAt])
+}
+
+// Reservation model - represents future bookings
+model Reservation {
+  id                    String        @id
+  equipmentId           String
+  memberId              String
+  startDate             DateTime
+  endDate               DateTime
+  status                String        // PENDING, CONFIRMED, CANCELLED, FULFILLED, EXPIRED
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+  confirmedAt           DateTime?
+  cancelledAt           DateTime?
+  fulfilledAt           DateTime?
+  expiryDate            DateTime?
+
+  equipment             Equipment     @relation(fields: [equipmentId], references: [id])
+  member                Member        @relation(fields: [memberId], references: [id])
+
+  @@index([equipmentId])
+  @@index([memberId])
+  @@index([status])
+  @@index([startDate])
+  @@index([endDate])
+}
+
+// DamageAssessment model - represents equipment condition evaluations
+model DamageAssessment {
+  id                    String        @id
+  rentalId              String
+  equipmentId           String
+  assessedBy            String
+  conditionBefore       String
+  conditionAfter        String
+  damageDescription     String?
+  repairCostAmount      Float         @default(0)
+  repairCostCurrency    String        @default("USD")
+  severity              String        // NONE, MINOR, MODERATE, MAJOR, SEVERE
+  assessedAt            DateTime      @default(now())
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  rental                Rental        @relation(fields: [rentalId], references: [id])
+  equipment             Equipment     @relation(fields: [equipmentId], references: [id])
+
+  @@index([rentalId])
+  @@index([equipmentId])
+  @@index([severity])
+  @@index([assessedAt])
+}
