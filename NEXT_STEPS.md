@@ -194,20 +194,33 @@ Orchestrate complex workflows:
 
 ## Phase 3: Adapters Layer
 
-### 3.1 In-Memory Adapters (for testing)
+### 3.1 In-Memory Adapters (for testing) ✅ COMPLETED
 Create simple implementations for testing:
 
-- [ ] `InMemoryEquipmentRepository`
-- [ ] `InMemoryMemberRepository`
-- [ ] `InMemoryRentalRepository`
-- [ ] `MockPaymentService`
-- [ ] `InMemoryEventPublisher`
+- [x] `InMemoryEquipmentRepository`
+- [x] `InMemoryMemberRepository`
+- [x] `InMemoryRentalRepository`
+- [x] `InMemoryReservationRepository`
+- [x] `MockPaymentService`
+- [x] `InMemoryEventPublisher`
 
-**Files to create**:
-- `src/adapters/outbound/persistence/InMemoryEquipmentRepository.ts`
-- `src/adapters/outbound/persistence/InMemoryMemberRepository.ts`
-- `src/adapters/outbound/persistence/InMemoryRentalRepository.ts`
-- `src/adapters/outbound/payment/MockPaymentService.ts`
+**Files created**:
+- ✅ `src/adapters/outbound/persistence/InMemoryEquipmentRepository.ts`
+- ✅ `src/adapters/outbound/persistence/InMemoryMemberRepository.ts`
+- ✅ `src/adapters/outbound/persistence/InMemoryRentalRepository.ts`
+- ✅ `src/adapters/outbound/persistence/InMemoryReservationRepository.ts`
+- ✅ `src/adapters/outbound/payment/MockPaymentService.ts`
+- ✅ `src/adapters/outbound/events/InMemoryEventPublisher.ts`
+
+**Tests created**:
+- ✅ `src/adapters/outbound/persistence/__tests__/InMemoryEquipmentRepository.test.ts`
+- ✅ `src/adapters/outbound/persistence/__tests__/InMemoryMemberRepository.test.ts`
+- ✅ `src/adapters/outbound/persistence/__tests__/InMemoryRentalRepository.test.ts`
+- ✅ `src/adapters/outbound/persistence/__tests__/InMemoryReservationRepository.test.ts`
+- ✅ `src/adapters/outbound/payment/__tests__/MockPaymentService.test.ts`
+- ✅ `src/adapters/outbound/events/__tests__/InMemoryEventPublisher.test.ts`
+
+**Test Coverage**: 659 tests passing (98 new adapter tests + 561 previous tests)
 
 ### 3.2 Database Adapters
 Choose and implement a real database adapter:
