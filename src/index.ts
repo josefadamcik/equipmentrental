@@ -72,11 +72,6 @@ async function bootstrap(): Promise<void> {
       prismaClient: useInMemoryAdapters
         ? undefined
         : new PrismaClient({
-            datasources: {
-              db: {
-                url: config.database.url,
-              },
-            },
             log: config.database.logQueries
               ? ['query', 'info', 'warn', 'error']
               : ['warn', 'error'],
@@ -126,7 +121,7 @@ async function bootstrap(): Promise<void> {
     // Step 5: Start HTTP server
     logger.info('Starting HTTP server');
     httpServer = app.listen(config.server.port, () => {
-      logger.info('Application Started Successfully!', {
+      logger!.info('Application Started Successfully!', {
         environment: config.server.nodeEnv,
         serverUrl: `http://${config.server.host}:${config.server.port}`,
         healthCheckUrl: `http://${config.server.host}:${config.server.port}/health`,
@@ -158,12 +153,12 @@ async function bootstrap(): Promise<void> {
     // Handle server errors
     httpServer.on('error', (error: NodeJS.ErrnoException) => {
       if (error.code === 'EADDRINUSE') {
-        logger.error(`Port ${config.server.port} is already in use`, error, {
+        logger!.error(`Port ${config.server.port} is already in use`, error, {
           port: config.server.port,
           suggestion: 'Please stop the other application or change the PORT in your .env file',
         });
       } else {
-        logger.error('Failed to start HTTP server', error);
+        logger!.error('Failed to start HTTP server', error);
       }
       process.exit(1);
     });
