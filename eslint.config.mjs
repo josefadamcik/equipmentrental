@@ -26,6 +26,7 @@ export default [
         module: 'readonly',
         require: 'readonly',
         crypto: 'readonly',
+        NodeJS: 'readonly',
       },
     },
     plugins: {
@@ -89,6 +90,7 @@ export default [
         afterEach: 'readonly',
         beforeAll: 'readonly',
         afterAll: 'readonly',
+        NodeJS: 'readonly',
       },
     },
     plugins: {
