@@ -1,0 +1,60 @@
+import express, { Express, json } from 'express';
+import { RentalController } from './controllers/RentalController.js';
+import { EquipmentController } from './controllers/EquipmentController.js';
+import { MemberController } from './controllers/MemberController.js';
+import { ReservationController } from './controllers/ReservationController.js';
+import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
+
+/**
+ * Configuration for the HTTP server
+ */
+export interface ServerConfig {
+  rentalController: RentalController;
+  equipmentController: EquipmentController;
+  memberController: MemberController;
+  reservationController: ReservationController;
+}
+
+/**
+ * Creates and configures an Express application with all routes and middleware
+ */
+export function createServer(config: ServerConfig): Express {
+  const app = express();
+
+  // Middleware
+  app.use(json()); // Parse JSON request bodies
+
+  // Health check endpoint
+  app.get('/health', (_req, res) => {
+    res.status(200).json({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      service: 'Equipment Rental System',
+    });
+  });
+
+  // API Routes
+  app.use('/api/rentals', config.rentalController.getRouter());
+  app.use('/api/equipment', config.equipmentController.getRouter());
+  app.use('/api/members', config.memberController.getRouter());
+  app.use('/api/reservations', config.reservationController.getRouter());
+
+  // 404 Handler (must be after all routes)
+  app.use(notFoundHandler);
+
+  // Error Handler (must be last)
+  app.use(errorHandler);
+
+  return app;
+}
+
+/**
+ * Starts the HTTP server on the specified port
+ */
+export function startServer(app: Express, port: number): void {
+  app.listen(port, () => {
+    console.log(`Equipment Rental System API server listening on port ${port}`);
+    console.log(`Health check: http://localhost:${port}/health`);
+    console.log(`API Base URL: http://localhost:${port}/api`);
+  });
+}
