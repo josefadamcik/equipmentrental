@@ -455,13 +455,26 @@ Initialize and start the application:
 
 ## Phase 5: Testing
 
-### 5.1 Unit Tests
+### 5.1 Unit Tests ✅ COMPLETED
 Test domain logic in isolation:
 
-- [ ] Test all value objects
-- [ ] Test all entities
-- [ ] Test business rule enforcement
-- [ ] Test state transitions
+- [x] Test all value objects
+- [x] Test all entities
+- [x] Test business rule enforcement
+- [x] Test state transitions
+
+**Files created**:
+- ✅ `src/domain/entities/__tests__/Reservation.test.ts` (31 tests)
+- ✅ `src/domain/entities/__tests__/DamageAssessment.test.ts` (27 tests)
+
+**Test Coverage**: 1006 tests passing (58 new entity tests + 948 previous tests)
+
+**Features tested**:
+- All value objects (Money, DateRange, identifiers) - comprehensive coverage
+- All entities (Equipment, Member, Rental, Reservation, DamageAssessment) - full lifecycle
+- Business rule enforcement across all domain objects
+- State transitions and state machine validation
+- Edge cases, error scenarios, and boundary conditions
 
 ### 5.2 Integration Tests
 Test use cases with in-memory adapters:
