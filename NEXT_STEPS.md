@@ -476,12 +476,27 @@ Test domain logic in isolation:
 - State transitions and state machine validation
 - Edge cases, error scenarios, and boundary conditions
 
-### 5.2 Integration Tests
+### 5.2 Integration Tests ✅ COMPLETED
 Test use cases with in-memory adapters:
 
-- [ ] Test command handlers
-- [ ] Test query handlers
-- [ ] Test application services
+- [x] Test command handlers
+- [x] Test query handlers
+- [x] Test application services
+
+**Files created**:
+- ✅ `src/application/commands/__tests__/integration/CommandHandlers.integration.test.ts`
+- ✅ `src/application/queries/__tests__/integration/QueryHandlers.integration.test.ts`
+- ✅ `src/application/services/__tests__/integration/ApplicationServices.integration.test.ts`
+
+**Test Coverage**: 1059 tests passing (12 new integration test suites + 1047 previous tests)
+
+**Features tested**:
+- Command handlers with real in-memory adapters instead of mocks
+- Query handlers with actual data persistence and retrieval
+- Application services with complex multi-step workflows
+- Full integration between application layer and adapter layer
+- Data persistence verification across multiple repositories
+- Business logic validation in integrated scenarios
 
 ### 5.3 End-to-End Tests
 Test complete flows through HTTP endpoints:
