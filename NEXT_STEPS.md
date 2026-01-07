@@ -262,7 +262,7 @@ Implement payment gateway integration:
 **Tests created**:
 - ✅ `src/adapters/outbound/payment/__tests__/StripePaymentService.test.ts`
 
-**Test Coverage**: 780 tests passing (31 new Stripe payment service tests + 749 previous tests)
+**Test Coverage**: 749 tests passing (31 new Stripe payment service tests included in total)
 
 **Features implemented**:
 - Full Stripe PaymentIntents API integration
