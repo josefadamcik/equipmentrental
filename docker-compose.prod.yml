@@ -1,0 +1,150 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database (Production)
+  postgres:
+    image: postgres:16-alpine
+    container_name: equipmentrental-postgres-prod
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-equipmentrental}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:-equipmentrental}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./prisma/migrations:/docker-entrypoint-initdb.d/migrations:ro
+    networks:
+      - equipmentrental-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-equipmentrental}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # Don't expose port in production (only accessible via internal network)
+    # Uncomment if external access is needed
+    # ports:
+    #   - "5432:5432"
+
+  # Application (Production)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: equipmentrental-app-prod
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: ${PORT:-3000}
+      HOST: 0.0.0.0
+      DATABASE_URL: postgresql://${POSTGRES_USER:-equipmentrental}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-equipmentrental}?schema=public
+      DATABASE_LOG_QUERIES: "${DATABASE_LOG_QUERIES:-false}"
+      DATABASE_CONNECTION_TIMEOUT: "${DATABASE_CONNECTION_TIMEOUT:-5000}"
+      DATABASE_POOL_MIN: "${DATABASE_POOL_MIN:-2}"
+      DATABASE_POOL_MAX: "${DATABASE_POOL_MAX:-10}"
+
+      # Payment configuration
+      PAYMENT_PROVIDER: ${PAYMENT_PROVIDER:-stripe}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:?STRIPE_SECRET_KEY is required when PAYMENT_PROVIDER=stripe}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+
+      # Notification configuration
+      NOTIFICATION_PROVIDER: ${NOTIFICATION_PROVIDER:-email}
+      EMAIL_HOST: ${EMAIL_HOST}
+      EMAIL_PORT: ${EMAIL_PORT:-587}
+      EMAIL_SECURE: ${EMAIL_SECURE:-false}
+      EMAIL_USER: ${EMAIL_USER}
+      EMAIL_PASS: ${EMAIL_PASS}
+      EMAIL_FROM: ${EMAIL_FROM}
+
+      # Logging configuration
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      LOG_FORMAT: ${LOG_FORMAT:-json}
+      LOG_DESTINATION: ${LOG_DESTINATION:-console}
+
+      # Server configuration
+      CORS_ENABLED: ${CORS_ENABLED:-true}
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      CORS_CREDENTIALS: ${CORS_CREDENTIALS:-false}
+      TRUST_PROXY: ${TRUST_PROXY:-true}
+      REQUEST_TIMEOUT: ${REQUEST_TIMEOUT:-30000}
+      BODY_LIMIT: ${BODY_LIMIT:-10mb}
+    ports:
+      - "${PORT:-3000}:3000"
+    networks:
+      - equipmentrental-network
+    command: sh -c "npx prisma migrate deploy && node dist/index.js"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    # Resource limits for production
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 512M
+
+  # Redis (Production - for caching and session management)
+  redis:
+    image: redis:7-alpine
+    container_name: equipmentrental-redis-prod
+    restart: always
+    volumes:
+      - redis_data:/data
+    networks:
+      - equipmentrental-network
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # Don't expose port in production
+    # Uncomment if external access is needed
+    # ports:
+    #   - "6379:6379"
+
+  # Nginx Reverse Proxy (Optional - for SSL termination and load balancing)
+  nginx:
+    image: nginx:alpine
+    container_name: equipmentrental-nginx
+    restart: always
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - nginx_cache:/var/cache/nginx
+    networks:
+      - equipmentrental-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  equipmentrental-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  nginx_cache:
+    driver: local

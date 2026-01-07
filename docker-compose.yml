@@ -1,0 +1,112 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: equipmentrental-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: equipmentrental
+      POSTGRES_PASSWORD: dev_password_change_in_production
+      POSTGRES_DB: equipmentrental
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./prisma/migrations:/docker-entrypoint-initdb.d/migrations:ro
+    networks:
+      - equipmentrental-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U equipmentrental"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Application (Development)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: equipmentrental-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      HOST: 0.0.0.0
+      DATABASE_URL: postgresql://equipmentrental:dev_password_change_in_production@postgres:5432/equipmentrental?schema=public
+      DATABASE_LOG_QUERIES: "true"
+      PAYMENT_PROVIDER: mock
+      NOTIFICATION_PROVIDER: console
+      LOG_LEVEL: debug
+      LOG_FORMAT: text
+      LOG_DESTINATION: console
+      CORS_ENABLED: "true"
+      CORS_ORIGIN: "*"
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mount source code for hot reload
+      - ./src:/app/src:ro
+      - ./prisma:/app/prisma:ro
+      - ./package.json:/app/package.json:ro
+      - ./tsconfig.json:/app/tsconfig.json:ro
+      # Prevent node_modules from being overwritten
+      - /app/node_modules
+    networks:
+      - equipmentrental-network
+    command: sh -c "npx prisma migrate deploy && npm run dev"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Redis (Optional - for caching and session management)
+  redis:
+    image: redis:7-alpine
+    container_name: equipmentrental-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - equipmentrental-network
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Adminer (Database Management UI)
+  adminer:
+    image: adminer:latest
+    container_name: equipmentrental-adminer
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+      ADMINER_DESIGN: nette
+    ports:
+      - "8080:8080"
+    networks:
+      - equipmentrental-network
+
+networks:
+  equipmentrental-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local

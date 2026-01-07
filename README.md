@@ -115,6 +115,7 @@ export class PrismaEquipmentRepository implements EquipmentRepository {
 ### Prerequisites
 - Node.js 18+
 - npm or yarn
+- Docker and Docker Compose (optional, for containerized deployment)
 
 ### Installation
 
@@ -123,6 +124,8 @@ npm install
 ```
 
 ### Development
+
+#### Running Locally (without Docker)
 
 ```bash
 # Run in development mode with hot reload
@@ -149,17 +152,57 @@ npm run format
 npm run format:check
 ```
 
+#### Running with Docker (Recommended)
+
+Docker provides a complete development environment with PostgreSQL, Redis, and Adminer (database UI).
+
+```bash
+# Start all services (app, PostgreSQL, Redis, Adminer)
+docker-compose up
+
+# Start in detached mode (background)
+docker-compose up -d
+
+# View logs
+docker-compose logs -f app
+
+# Stop all services
+docker-compose down
+
+# Stop and remove volumes (clean slate)
+docker-compose down -v
+
+# Rebuild containers after code changes
+docker-compose up --build
+```
+
+**Access Points:**
+- Application API: http://localhost:3000
+- API Documentation: http://localhost:3000/api-docs
+- Adminer (Database UI): http://localhost:8080
+  - System: PostgreSQL
+  - Server: postgres
+  - Username: equipmentrental
+  - Password: dev_password_change_in_production
+  - Database: equipmentrental
+
 ### Build
 
 ```bash
-# Build for production
+# Build for production (local)
 npm run build
 
-# Run production build
+# Run production build (local)
 npm start
 
 # Clean build artifacts
 npm run clean
+
+# Build Docker image for production
+docker build --target production -t equipmentrental:latest .
+
+# Run production container
+docker-compose -f docker-compose.prod.yml up -d
 ```
 
 ## Development Workflow
@@ -181,6 +224,90 @@ npm run clean
 - **Adapters**: Adapter tests against real implementations or comprehensive mocks
 - **End-to-End**: Full system tests through HTTP endpoints
 
+## Docker Deployment
+
+### Architecture
+
+The application uses a multi-stage Dockerfile for optimal image size and security:
+
+1. **Base Stage**: Common dependencies and setup
+2. **Development Stage**: Full dev dependencies with hot reload
+3. **Build Stage**: TypeScript compilation
+4. **Production Stage**: Minimal runtime image with non-root user
+
+### Development Environment
+
+The development Docker Compose setup includes:
+
+- **Application**: Node.js app with hot reload (port 3000)
+- **PostgreSQL**: Database server (port 5432)
+- **Redis**: Caching and session store (port 6379)
+- **Adminer**: Database management UI (port 8080)
+
+### Production Deployment
+
+For production, use `docker-compose.prod.yml`:
+
+```bash
+# Copy and configure production environment
+cp .env.production.example .env.production
+# Edit .env.production with your production values
+
+# Start production services
+docker-compose -f docker-compose.prod.yml up -d
+
+# View production logs
+docker-compose -f docker-compose.prod.yml logs -f
+
+# Stop production services
+docker-compose -f docker-compose.prod.yml down
+```
+
+**Production Features:**
+- Multi-stage build for minimal image size
+- Non-root user for security
+- Health checks for all services
+- Resource limits and reservations
+- SSL-ready with Nginx reverse proxy (optional)
+- Automatic database migrations on startup
+- Redis with password protection
+
+### Environment Configuration
+
+Three environment file templates are provided:
+
+- `.env.example` - Local development (SQLite)
+- `.env.docker` - Docker development (PostgreSQL)
+- `.env.production.example` - Production deployment
+
+Copy the appropriate template to `.env` based on your deployment method.
+
+### Useful Docker Commands
+
+```bash
+# Build specific stage
+docker build --target development -t equipmentrental:dev .
+docker build --target production -t equipmentrental:prod .
+
+# Run database migrations
+docker-compose exec app npx prisma migrate deploy
+
+# Access database shell
+docker-compose exec postgres psql -U equipmentrental -d equipmentrental
+
+# Access Redis CLI
+docker-compose exec redis redis-cli
+
+# View real-time logs
+docker-compose logs -f
+
+# Restart a specific service
+docker-compose restart app
+
+# Scale the application (multiple instances)
+docker-compose up -d --scale app=3
+```
+
 ## Technology Stack
 
 - **Runtime**: Node.js (ES Modules)
@@ -190,18 +317,23 @@ npm run clean
 - **Code Quality**: ESLint 9 (flat config), Prettier
 - **Build**: TypeScript Compiler (tsc)
 - **Dev Server**: tsx (fast TypeScript runner with watch mode)
+- **Containerization**: Docker and Docker Compose
+- **Database**: PostgreSQL 16 (production), SQLite (local dev)
+- **Caching**: Redis 7
 
 ## Future Enhancements
 
-- Database integration (Prisma/TypeORM)
-- REST API implementation (Express/Fastify/NestJS)
-- Authentication & Authorization
-- Payment gateway integration (Stripe)
-- Email notifications
-- Reservation queue system
-- Maintenance scheduling
-- Reporting & analytics
+- Authentication & Authorization (JWT, OAuth)
+- Reservation queue system with priority handling
+- Advanced maintenance scheduling with predictive analytics
+- Reporting & analytics dashboard
 - GraphQL API adapter
+- WebSocket support for real-time updates
+- Multi-tenancy support
+- Advanced caching strategies with Redis
+- Rate limiting and API throttling
+- Comprehensive monitoring and observability (Prometheus, Grafana)
+- Event sourcing and CQRS for audit trails
 
 ## Resources
 
