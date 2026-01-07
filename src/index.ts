@@ -18,6 +18,7 @@ import { RentalController } from './adapters/inbound/http/controllers/RentalCont
 import { EquipmentController } from './adapters/inbound/http/controllers/EquipmentController.js';
 import { MemberController } from './adapters/inbound/http/controllers/MemberController.js';
 import { ReservationController } from './adapters/inbound/http/controllers/ReservationController.js';
+import { ILogger } from './infrastructure/logging/Logger.js';
 import { PrismaClient } from '@prisma/client';
 import { Server } from 'http';
 
@@ -26,6 +27,7 @@ import { Server } from 'http';
  */
 let container: Container | undefined;
 let httpServer: Server | undefined;
+let logger: ILogger | undefined;
 let isShuttingDown = false;
 
 /**
@@ -51,6 +53,7 @@ async function bootstrap(): Promise<void> {
       useInMemoryAdapters,
       useMockPayment: config.payment.provider === 'mock',
       useConsoleNotification: config.notification.provider === 'console',
+      loggingConfig: config.logging,
       stripeConfig:
         config.payment.provider === 'stripe'
           ? {
@@ -81,22 +84,28 @@ async function bootstrap(): Promise<void> {
     });
 
     await container.initialize();
-    console.log('Dependency injection container initialized successfully');
-    console.log(`- Using ${useInMemoryAdapters ? 'in-memory' : 'Prisma'} repositories`);
-    console.log(`- Using ${config.payment.provider} payment service`);
-    console.log(`- Using ${config.notification.provider} notification service`);
+
+    // Resolve logger from container
+    logger = container.resolve<ILogger>(DI_TOKENS.Logger);
+
+    logger.info('Dependency injection container initialized successfully', {
+      repositories: useInMemoryAdapters ? 'in-memory' : 'Prisma',
+      paymentService: config.payment.provider,
+      notificationService: config.notification.provider,
+    });
 
     // Step 3: Initialize database connections
     if (!useInMemoryAdapters) {
-      console.log('\n[3/5] Connecting to database...');
-      console.log(`Database URL: ${config.database.url.replace(/:[^:@]+@/, ':***@')}`);
-      console.log('Database connection established successfully');
+      logger.info('Connecting to database', {
+        url: config.database.url.replace(/:[^:@]+@/, ':***@'),
+      });
+      logger.info('Database connection established successfully');
     } else {
-      console.log('\n[3/5] Using in-memory storage (no database connection needed)');
+      logger.info('Using in-memory storage (no database connection needed)');
     }
 
     // Step 4: Create and configure HTTP server
-    console.log('\n[4/5] Creating HTTP server...');
+    logger.info('Creating HTTP server');
     const rentalController = container.resolve<RentalController>(DI_TOKENS.RentalController);
     const equipmentController = container.resolve<EquipmentController>(
       DI_TOKENS.EquipmentController,
@@ -111,66 +120,75 @@ async function bootstrap(): Promise<void> {
       equipmentController,
       memberController,
       reservationController,
+      logger,
     });
 
     // Step 5: Start HTTP server
-    console.log('\n[5/5] Starting HTTP server...');
+    logger.info('Starting HTTP server');
     httpServer = app.listen(config.server.port, () => {
-      console.log('\n' + '='.repeat(60));
-      console.log('Application Started Successfully!');
-      console.log('='.repeat(60));
-      console.log(`\nEnvironment: ${config.server.nodeEnv}`);
-      console.log(`Server listening on: http://${config.server.host}:${config.server.port}`);
-      console.log(`Health check: http://${config.server.host}:${config.server.port}/health`);
-      console.log(`API Base URL: http://${config.server.host}:${config.server.port}/api`);
-      console.log('\nAvailable endpoints:');
-      console.log('  - GET    /health');
-      console.log('  - POST   /api/rentals');
-      console.log('  - GET    /api/rentals/:id');
-      console.log('  - PUT    /api/rentals/:id/return');
-      console.log('  - PUT    /api/rentals/:id/extend');
-      console.log('  - GET    /api/rentals/member/:memberId');
-      console.log('  - GET    /api/rentals/overdue');
-      console.log('  - GET    /api/equipment/available');
-      console.log('  - GET    /api/equipment/:id');
-      console.log('  - POST   /api/equipment');
-      console.log('  - PUT    /api/equipment/:id');
-      console.log('  - DELETE /api/equipment/:id');
-      console.log('  - POST   /api/members');
-      console.log('  - GET    /api/members/:id');
-      console.log('  - PUT    /api/members/:id');
-      console.log('  - GET    /api/members/:id/rentals');
-      console.log('  - POST   /api/reservations');
-      console.log('  - GET    /api/reservations/:id');
-      console.log('  - DELETE /api/reservations/:id');
-      console.log('\nPress Ctrl+C to stop the server');
-      console.log('='.repeat(60) + '\n');
+      logger.info('Application Started Successfully!', {
+        environment: config.server.nodeEnv,
+        serverUrl: `http://${config.server.host}:${config.server.port}`,
+        healthCheckUrl: `http://${config.server.host}:${config.server.port}/health`,
+        apiBaseUrl: `http://${config.server.host}:${config.server.port}/api`,
+        availableEndpoints: [
+          'GET    /health',
+          'POST   /api/rentals',
+          'GET    /api/rentals/:id',
+          'PUT    /api/rentals/:id/return',
+          'PUT    /api/rentals/:id/extend',
+          'GET    /api/rentals/member/:memberId',
+          'GET    /api/rentals/overdue',
+          'GET    /api/equipment/available',
+          'GET    /api/equipment/:id',
+          'POST   /api/equipment',
+          'PUT    /api/equipment/:id',
+          'DELETE /api/equipment/:id',
+          'POST   /api/members',
+          'GET    /api/members/:id',
+          'PUT    /api/members/:id',
+          'GET    /api/members/:id/rentals',
+          'POST   /api/reservations',
+          'GET    /api/reservations/:id',
+          'DELETE /api/reservations/:id',
+        ],
+      });
     });
 
     // Handle server errors
     httpServer.on('error', (error: NodeJS.ErrnoException) => {
       if (error.code === 'EADDRINUSE') {
-        console.error(`\nERROR: Port ${config.server.port} is already in use`);
-        console.error('Please stop the other application or change the PORT in your .env file');
+        logger.error(`Port ${config.server.port} is already in use`, error, {
+          port: config.server.port,
+          suggestion: 'Please stop the other application or change the PORT in your .env file',
+        });
       } else {
-        console.error('\nERROR: Failed to start HTTP server:', error.message);
+        logger.error('Failed to start HTTP server', error);
       }
       process.exit(1);
     });
   } catch (error) {
-    console.error('\n' + '='.repeat(60));
-    console.error('FATAL ERROR: Application failed to start');
-    console.error('='.repeat(60));
-    if (error instanceof Error) {
-      console.error(`\nError: ${error.message}`);
-      if (error.stack) {
-        console.error('\nStack trace:');
-        console.error(error.stack);
-      }
+    // If logger is available, use it; otherwise fall back to console
+    if (logger) {
+      logger.error(
+        'FATAL ERROR: Application failed to start',
+        error instanceof Error ? error : new Error(String(error)),
+      );
     } else {
-      console.error(error);
+      console.error('\n' + '='.repeat(60));
+      console.error('FATAL ERROR: Application failed to start');
+      console.error('='.repeat(60));
+      if (error instanceof Error) {
+        console.error(`\nError: ${error.message}`);
+        if (error.stack) {
+          console.error('\nStack trace:');
+          console.error(error.stack);
+        }
+      } else {
+        console.error(error);
+      }
+      console.error('\n' + '='.repeat(60));
     }
-    console.error('\n' + '='.repeat(60));
     process.exit(1);
   }
 }
@@ -180,20 +198,32 @@ async function bootstrap(): Promise<void> {
  */
 async function shutdown(signal: string): Promise<void> {
   if (isShuttingDown) {
-    console.log('\nForce shutdown detected. Exiting immediately...');
+    if (logger) {
+      logger.warn('Force shutdown detected. Exiting immediately...');
+    } else {
+      console.log('\nForce shutdown detected. Exiting immediately...');
+    }
     process.exit(1);
   }
 
   isShuttingDown = true;
 
-  console.log('\n' + '='.repeat(60));
-  console.log(`Received ${signal} - Starting graceful shutdown...`);
-  console.log('='.repeat(60));
+  if (logger) {
+    logger.info(`Received ${signal} - Starting graceful shutdown...`);
+  } else {
+    console.log('\n' + '='.repeat(60));
+    console.log(`Received ${signal} - Starting graceful shutdown...`);
+    console.log('='.repeat(60));
+  }
 
   try {
     // Step 1: Stop accepting new connections
     if (httpServer) {
-      console.log('\n[1/2] Closing HTTP server...');
+      if (logger) {
+        logger.info('Closing HTTP server');
+      } else {
+        console.log('\n[1/2] Closing HTTP server...');
+      }
       await new Promise<void>((resolve, reject) => {
         httpServer!.close((error) => {
           if (error) {
@@ -203,26 +233,49 @@ async function shutdown(signal: string): Promise<void> {
           }
         });
       });
-      console.log('HTTP server closed successfully');
+      if (logger) {
+        logger.info('HTTP server closed successfully');
+      } else {
+        console.log('HTTP server closed successfully');
+      }
     }
 
     // Step 2: Close database connections and cleanup resources
     if (container) {
-      console.log('\n[2/2] Disposing container and closing database connections...');
+      if (logger) {
+        logger.info('Disposing container and closing database connections');
+      } else {
+        console.log('\n[2/2] Disposing container and closing database connections...');
+      }
       await container.dispose();
-      console.log('Container disposed successfully');
+      if (logger) {
+        logger.info('Container disposed successfully');
+      } else {
+        console.log('Container disposed successfully');
+      }
     }
 
-    console.log('\n' + '='.repeat(60));
-    console.log('Graceful shutdown completed successfully');
-    console.log('='.repeat(60) + '\n');
+    if (logger) {
+      logger.info('Graceful shutdown completed successfully');
+    } else {
+      console.log('\n' + '='.repeat(60));
+      console.log('Graceful shutdown completed successfully');
+      console.log('='.repeat(60) + '\n');
+    }
     process.exit(0);
   } catch (error) {
-    console.error('\nERROR during shutdown:');
-    if (error instanceof Error) {
-      console.error(error.message);
+    if (logger) {
+      logger.error(
+        'ERROR during shutdown',
+        error instanceof Error ? error : new Error(String(error)),
+      );
     } else {
-      console.error(error);
+      console.error('\nERROR during shutdown:');
+      if (error instanceof Error) {
+        console.error(error.message);
+      } else {
+        console.error(error);
+      }
     }
     process.exit(1);
   }
@@ -232,32 +285,43 @@ async function shutdown(signal: string): Promise<void> {
  * Global error handlers
  */
 process.on('uncaughtException', (error: Error) => {
-  console.error('\n' + '='.repeat(60));
-  console.error('UNCAUGHT EXCEPTION - Application will terminate');
-  console.error('='.repeat(60));
-  console.error(`\nError: ${error.message}`);
-  if (error.stack) {
-    console.error('\nStack trace:');
-    console.error(error.stack);
+  if (logger) {
+    logger.error('UNCAUGHT EXCEPTION - Application will terminate', error);
+  } else {
+    console.error('\n' + '='.repeat(60));
+    console.error('UNCAUGHT EXCEPTION - Application will terminate');
+    console.error('='.repeat(60));
+    console.error(`\nError: ${error.message}`);
+    if (error.stack) {
+      console.error('\nStack trace:');
+      console.error(error.stack);
+    }
+    console.error('\n' + '='.repeat(60));
   }
-  console.error('\n' + '='.repeat(60));
   process.exit(1);
 });
 
 process.on('unhandledRejection', (reason: unknown) => {
-  console.error('\n' + '='.repeat(60));
-  console.error('UNHANDLED PROMISE REJECTION - Application will terminate');
-  console.error('='.repeat(60));
-  if (reason instanceof Error) {
-    console.error(`\nError: ${reason.message}`);
-    if (reason.stack) {
-      console.error('\nStack trace:');
-      console.error(reason.stack);
-    }
+  if (logger) {
+    logger.error(
+      'UNHANDLED PROMISE REJECTION - Application will terminate',
+      reason instanceof Error ? reason : new Error(String(reason)),
+    );
   } else {
-    console.error('\nReason:', reason);
+    console.error('\n' + '='.repeat(60));
+    console.error('UNHANDLED PROMISE REJECTION - Application will terminate');
+    console.error('='.repeat(60));
+    if (reason instanceof Error) {
+      console.error(`\nError: ${reason.message}`);
+      if (reason.stack) {
+        console.error('\nStack trace:');
+        console.error(reason.stack);
+      }
+    } else {
+      console.error('\nReason:', reason);
+    }
+    console.error('\n' + '='.repeat(60));
   }
-  console.error('\n' + '='.repeat(60));
   process.exit(1);
 });
 

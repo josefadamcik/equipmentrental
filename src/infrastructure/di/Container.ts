@@ -47,6 +47,10 @@ import { ConsoleNotificationService } from '../../adapters/outbound/notification
 import { EmailNotificationService } from '../../adapters/outbound/notification/EmailNotificationService.js';
 import { InMemoryEventPublisher } from '../../adapters/outbound/events/InMemoryEventPublisher.js';
 
+// Infrastructure
+import { createLogger } from '../logging/Logger.js';
+import { LoggingConfig } from '../config/Config.js';
+
 // Controllers
 import { RentalController } from '../../adapters/inbound/http/controllers/RentalController.js';
 import { EquipmentController } from '../../adapters/inbound/http/controllers/EquipmentController.js';
@@ -95,6 +99,11 @@ export interface ContainerConfig {
   };
 
   /**
+   * Logging configuration (required)
+   */
+  loggingConfig?: LoggingConfig;
+
+  /**
    * Prisma client instance (optional, will be created if not provided)
    */
   prismaClient?: PrismaClient;
@@ -125,6 +134,9 @@ export class Container {
    * This method should be called once during application startup
    */
   public async initialize(): Promise<void> {
+    // Register logger first (needed by other components)
+    this.registerLogger();
+
     // Initialize Prisma client if using database adapters
     if (!this.config.useInMemoryAdapters) {
       this.prismaClient = this.config.prismaClient ?? new PrismaClient();
@@ -162,6 +174,19 @@ export class Container {
 
     // Clear all registrations
     this.registrations.clear();
+  }
+
+  /**
+   * Register logger
+   */
+  private registerLogger(): void {
+    const loggingConfig = this.config.loggingConfig ?? {
+      level: 'info',
+      format: 'text',
+      destination: 'console',
+    };
+
+    this.registerSingleton(DI_TOKENS.Logger, () => createLogger(loggingConfig));
   }
 
   /**

@@ -196,12 +196,14 @@ describe('Application Bootstrap', () => {
       const equipmentController = container.resolve<any>(DI_TOKENS.EquipmentController);
       const memberController = container.resolve<any>(DI_TOKENS.MemberController);
       const reservationController = container.resolve<any>(DI_TOKENS.ReservationController);
+      const logger = container.resolve<any>(DI_TOKENS.Logger);
 
       const app = createServer({
         rentalController,
         equipmentController,
         memberController,
         reservationController,
+        logger,
       });
 
       expect(app).toBeDefined();
@@ -228,12 +230,14 @@ describe('Application Bootstrap', () => {
       const equipmentController = container.resolve<any>(DI_TOKENS.EquipmentController);
       const memberController = container.resolve<any>(DI_TOKENS.MemberController);
       const reservationController = container.resolve<any>(DI_TOKENS.ReservationController);
+      const logger = container.resolve<any>(DI_TOKENS.Logger);
 
       const app = createServer({
         rentalController,
         equipmentController,
         memberController,
         reservationController,
+        logger,
       });
 
       const response = await request(app).get('/health');
@@ -371,6 +375,7 @@ describe('Application Bootstrap', () => {
       const equipmentController = container.resolve<any>(DI_TOKENS.EquipmentController);
       const memberController = container.resolve<any>(DI_TOKENS.MemberController);
       const reservationController = container.resolve<any>(DI_TOKENS.ReservationController);
+      const logger = container.resolve<any>(DI_TOKENS.Logger);
 
       // Create server
       const app = createServer({
@@ -378,6 +383,7 @@ describe('Application Bootstrap', () => {
         equipmentController,
         memberController,
         reservationController,
+        logger,
       });
 
       expect(app).toBeDefined();

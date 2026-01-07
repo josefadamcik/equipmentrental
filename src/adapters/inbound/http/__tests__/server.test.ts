@@ -5,6 +5,7 @@ import { RentalController } from '../controllers/RentalController.js';
 import { EquipmentController } from '../controllers/EquipmentController.js';
 import { MemberController } from '../controllers/MemberController.js';
 import { ReservationController } from '../controllers/ReservationController.js';
+import { NoOpLogger } from '../../../../infrastructure/logging/Logger.js';
 
 describe('Server', () => {
   let app: Express;
@@ -36,6 +37,7 @@ describe('Server', () => {
       equipmentController: mockEquipmentController,
       memberController: mockMemberController,
       reservationController: mockReservationController,
+      logger: new NoOpLogger(),
     });
   });
 

@@ -4,6 +4,8 @@ import { EquipmentController } from './controllers/EquipmentController.js';
 import { MemberController } from './controllers/MemberController.js';
 import { ReservationController } from './controllers/ReservationController.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
+import { ILogger } from '../../../infrastructure/logging/Logger.js';
+import { createRequestLogger } from '../../../infrastructure/logging/RequestLogger.js';
 
 /**
  * Configuration for the HTTP server
@@ -13,6 +15,7 @@ export interface ServerConfig {
   equipmentController: EquipmentController;
   memberController: MemberController;
   reservationController: ReservationController;
+  logger: ILogger;
 }
 
 /**
@@ -23,6 +26,13 @@ export function createServer(config: ServerConfig): Express {
 
   // Middleware
   app.use(json()); // Parse JSON request bodies
+
+  // Request logging middleware
+  app.use(
+    createRequestLogger(config.logger, {
+      excludePaths: ['/health'],
+    }),
+  );
 
   // Health check endpoint
   app.get('/health', (_req, res) => {
@@ -51,10 +61,12 @@ export function createServer(config: ServerConfig): Express {
 /**
  * Starts the HTTP server on the specified port
  */
-export function startServer(app: Express, port: number): void {
+export function startServer(app: Express, port: number, logger: ILogger): void {
   app.listen(port, () => {
-    console.log(`Equipment Rental System API server listening on port ${port}`);
-    console.log(`Health check: http://localhost:${port}/health`);
-    console.log(`API Base URL: http://localhost:${port}/api`);
+    logger.info('Equipment Rental System API server started', {
+      port,
+      healthCheckUrl: `http://localhost:${port}/health`,
+      apiBaseUrl: `http://localhost:${port}/api`,
+    });
   });
 }

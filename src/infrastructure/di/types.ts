@@ -20,6 +20,9 @@ export const DI_TOKENS = {
   NotificationService: Symbol.for('NotificationService'),
   EventPublisher: Symbol.for('EventPublisher'),
 
+  // Infrastructure
+  Logger: Symbol.for('Logger'),
+
   // Application Services
   RentalService: Symbol.for('RentalService'),
   ReservationService: Symbol.for('ReservationService'),
