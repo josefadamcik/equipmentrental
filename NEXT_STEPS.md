@@ -290,36 +290,45 @@ Implement notification delivery:
 
 **Test Coverage**: 718 tests passing (35 new notification adapter tests + 683 previous tests)
 
-### 3.5 HTTP Controllers (REST API)
-Choose a web framework and implement controllers:
+### 3.5 HTTP Controllers (REST API) ✅ COMPLETED
+Implemented REST API using Express framework:
 
-**Option A: Express**
-```bash
-npm install express @types/express
-```
+- [x] `RentalController` - CRUD operations for rentals
+- [x] `EquipmentController` - Equipment management
+- [x] `MemberController` - Member operations
+- [x] `ReservationController` - Reservation handling
 
-**Option B: Fastify**
-```bash
-npm install fastify
-```
+**Files created**:
+- ✅ `src/adapters/inbound/http/server.ts`
+- ✅ `src/adapters/inbound/http/controllers/RentalController.ts`
+- ✅ `src/adapters/inbound/http/controllers/EquipmentController.ts`
+- ✅ `src/adapters/inbound/http/controllers/MemberController.ts`
+- ✅ `src/adapters/inbound/http/controllers/ReservationController.ts`
+- ✅ `src/adapters/inbound/http/middleware/errorHandler.ts`
+- ✅ `src/adapters/inbound/http/dtos/RentalDTOs.ts`
+- ✅ `src/adapters/inbound/http/dtos/EquipmentDTOs.ts`
+- ✅ `src/adapters/inbound/http/dtos/MemberDTOs.ts`
+- ✅ `src/adapters/inbound/http/dtos/ReservationDTOs.ts`
+- ✅ `src/adapters/inbound/http/dtos/ErrorDTOs.ts`
 
-**Option C: NestJS** (includes DI container)
-```bash
-npm install @nestjs/core @nestjs/common @nestjs/platform-express
-```
+**Tests created**:
+- ✅ `src/adapters/inbound/http/controllers/__tests__/RentalController.test.ts`
+- ✅ `src/adapters/inbound/http/controllers/__tests__/EquipmentController.test.ts`
+- ✅ `src/adapters/inbound/http/controllers/__tests__/MemberController.test.ts`
+- ✅ `src/adapters/inbound/http/controllers/__tests__/ReservationController.test.ts`
+- ✅ `src/adapters/inbound/http/middleware/__tests__/errorHandler.test.ts`
+- ✅ `src/adapters/inbound/http/__tests__/server.test.ts`
 
-**Controllers to create**:
-- [ ] `RentalController` - CRUD operations for rentals
-- [ ] `EquipmentController` - Equipment management
-- [ ] `MemberController` - Member operations
-- [ ] `ReservationController` - Reservation handling
+**Test Coverage**: 794 tests passing (45 new HTTP controller tests + 749 previous tests)
 
-**Files to create** (Express example):
-- `src/adapters/inbound/http/server.ts`
-- `src/adapters/inbound/http/controllers/RentalController.ts`
-- `src/adapters/inbound/http/controllers/EquipmentController.ts`
-- `src/adapters/inbound/http/controllers/MemberController.ts`
-- `src/adapters/inbound/http/middleware/errorHandler.ts`
+**Features implemented**:
+- Full RESTful API endpoints for all major operations
+- Request/Response DTOs with proper type safety
+- Error handler middleware with domain exception mapping
+- Health check endpoint
+- Comprehensive test coverage with supertest
+- Proper HTTP status codes (201, 200, 404, 409, 403, etc.)
+- Request validation and error handling
 
 ## Phase 4: Infrastructure Layer
 
