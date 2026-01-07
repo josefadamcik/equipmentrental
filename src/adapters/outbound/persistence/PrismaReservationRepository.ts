@@ -185,12 +185,12 @@ export class PrismaReservationRepository implements ReservationRepository {
     return reservations.map((r) => this.toDomain(r));
   }
 
-  async findByCreatedDateRange(range: DateRange): Promise<Reservation[]> {
+  async findByCreatedDateRange(startDate: Date, endDate: Date): Promise<Reservation[]> {
     const reservations = await this.prisma.reservation.findMany({
       where: {
         createdAt: {
-          gte: range.start,
-          lte: range.end,
+          gte: startDate,
+          lte: endDate,
         },
       },
       orderBy: { createdAt: 'desc' },

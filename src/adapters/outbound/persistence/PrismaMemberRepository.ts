@@ -3,7 +3,6 @@ import { Member } from '../../../domain/entities/Member.js';
 import { MemberRepository } from '../../../domain/ports/MemberRepository.js';
 import { MemberId } from '../../../domain/value-objects/identifiers.js';
 import { MembershipTier } from '../../../domain/types/MembershipTier.js';
-import { DateRange } from '../../../domain/value-objects/DateRange.js';
 
 /**
  * Prisma implementation of MemberRepository
@@ -110,12 +109,12 @@ export class PrismaMemberRepository implements MemberRepository {
     return members.map((m) => this.toDomain(m));
   }
 
-  async findByJoinDateRange(range: DateRange): Promise<Member[]> {
+  async findByJoinDateRange(startDate: Date, endDate: Date): Promise<Member[]> {
     const members = await this.prisma.member.findMany({
       where: {
         joinDate: {
-          gte: range.start,
-          lte: range.end,
+          gte: startDate,
+          lte: endDate,
         },
       },
       orderBy: { joinDate: 'desc' },

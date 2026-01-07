@@ -172,12 +172,12 @@ export class PrismaRentalRepository implements RentalRepository {
     return rentals.map((r) => this.toDomain(r));
   }
 
-  async findByCreatedDateRange(range: DateRange): Promise<Rental[]> {
+  async findByCreatedDateRange(startDate: Date, endDate: Date): Promise<Rental[]> {
     const rentals = await this.prisma.rental.findMany({
       where: {
         createdAt: {
-          gte: range.start,
-          lte: range.end,
+          gte: startDate,
+          lte: endDate,
         },
       },
       orderBy: { createdAt: 'desc' },
@@ -185,12 +185,12 @@ export class PrismaRentalRepository implements RentalRepository {
     return rentals.map((r) => this.toDomain(r));
   }
 
-  async findByReturnedDateRange(range: DateRange): Promise<Rental[]> {
+  async findByReturnedDateRange(startDate: Date, endDate: Date): Promise<Rental[]> {
     const rentals = await this.prisma.rental.findMany({
       where: {
         returnedAt: {
-          gte: range.start,
-          lte: range.end,
+          gte: startDate,
+          lte: endDate,
         },
       },
       orderBy: { returnedAt: 'desc' },
