@@ -401,17 +401,37 @@ Set up structured logging:
 - `src/infrastructure/logging/Logger.ts`
 - `src/infrastructure/logging/RequestLogger.ts`
 
-### 4.4 Application Bootstrap
+### 4.4 Application Bootstrap ✅ COMPLETED
 Initialize and start the application:
 
-- [ ] Load configuration
-- [ ] Initialize database connections
-- [ ] Register dependencies in DI container
-- [ ] Start HTTP server
-- [ ] Set up graceful shutdown
+- [x] Load configuration
+- [x] Initialize database connections
+- [x] Register dependencies in DI container
+- [x] Start HTTP server
+- [x] Set up graceful shutdown
 
-**Update**:
-- `src/index.ts` - Main entry point
+**Files updated**:
+- ✅ `src/index.ts` - Main entry point with complete bootstrap lifecycle
+- ✅ `eslint.config.mjs` - Added NodeJS global for proper type recognition
+
+**Tests created**:
+- ✅ `src/__tests__/index.test.ts` - Comprehensive bootstrap tests (19 tests)
+
+**Test Coverage**: 948 tests passing (19 new bootstrap tests + 929 previous tests)
+
+**Features implemented**:
+- Complete application lifecycle management
+- 5-step initialization process with clear console feedback
+- Configuration-based adapter selection (in-memory vs Prisma)
+- Payment service selection (Mock vs Stripe)
+- Notification service selection (Console vs Email)
+- Automatic Prisma client creation with query logging support
+- Graceful shutdown handlers (SIGTERM, SIGINT)
+- Comprehensive error handling and logging
+- Uncaught exception and unhandled rejection handlers
+- Detailed startup information with endpoint listing
+- Server error handling (port conflicts, startup failures)
+- Clean resource cleanup on shutdown
 
 ## Phase 5: Testing
 
