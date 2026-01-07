@@ -1,4 +1,4 @@
-import { DomainException } from './DomainException';
+import { DomainException } from './DomainException.js';
 
 /**
  * Thrown when a rental operation is not allowed due to business rule violations

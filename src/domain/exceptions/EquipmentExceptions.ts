@@ -1,4 +1,4 @@
-import { DomainException } from './DomainException';
+import { DomainException } from './DomainException.js';
 
 /**
  * Thrown when equipment is not available for rental

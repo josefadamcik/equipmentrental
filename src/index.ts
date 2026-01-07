@@ -20,6 +20,7 @@ import { MemberController } from './adapters/inbound/http/controllers/MemberCont
 import { ReservationController } from './adapters/inbound/http/controllers/ReservationController.js';
 import { ILogger } from './infrastructure/logging/Logger.js';
 import { PrismaClient } from '@prisma/client';
+import { PrismaLibSql } from '@prisma/adapter-libsql';
 import { Server } from 'http';
 
 /**
@@ -71,11 +72,17 @@ async function bootstrap(): Promise<void> {
           : undefined,
       prismaClient: useInMemoryAdapters
         ? undefined
-        : new PrismaClient({
-            log: config.database.logQueries
-              ? ['query', 'info', 'warn', 'error']
-              : ['warn', 'error'],
-          }),
+        : (() => {
+            const adapter = new PrismaLibSql({
+              url: `file:${config.database.url.replace('file:', '')}`,
+            });
+            return new PrismaClient({
+              adapter: adapter as any,
+              log: config.database.logQueries
+                ? ['query', 'info', 'warn', 'error']
+                : ['warn', 'error'],
+            });
+          })(),
     });
 
     await container.initialize();
