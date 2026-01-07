@@ -1,0 +1,1339 @@
+openapi: 3.0.3
+info:
+  title: Equipment Rental System API
+  description: |
+    A comprehensive API for managing equipment rentals, reservations, and members.
+    Built using hexagonal architecture with TypeScript.
+
+    ## Features
+    - Equipment management and availability tracking
+    - Member registration and tier-based benefits
+    - Rental creation, extension, and return workflows
+    - Reservation system with payment authorization
+    - Damage assessment and late fee calculation
+    - Payment processing integration
+    - Notification system
+
+    ## Architecture
+    This API follows hexagonal (ports and adapters) architecture principles,
+    ensuring clean separation of concerns and testability.
+  version: 1.0.0
+  contact:
+    name: Equipment Rental System
+    email: support@equipmentrental.com
+
+servers:
+  - url: http://localhost:3000
+    description: Development server
+  - url: http://localhost:3000/api
+    description: API base path
+
+tags:
+  - name: Equipment
+    description: Equipment management and availability
+  - name: Members
+    description: Member management and rentals
+  - name: Rentals
+    description: Rental lifecycle management
+  - name: Reservations
+    description: Reservation system
+  - name: Health
+    description: System health checks
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Returns the health status of the API service
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheckResponse'
+              example:
+                status: healthy
+                timestamp: '2024-01-15T10:30:00.000Z'
+                service: Equipment Rental System
+
+  /api/equipment:
+    get:
+      summary: Get available equipment
+      description: Retrieves a list of all equipment currently available for rent
+      tags:
+        - Equipment
+      parameters:
+        - in: query
+          name: startDate
+          schema:
+            type: string
+            format: date
+          description: Start date for availability check (ISO 8601)
+        - in: query
+          name: endDate
+          schema:
+            type: string
+            format: date
+          description: End date for availability check (ISO 8601)
+      responses:
+        '200':
+          description: List of available equipment
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AvailableEquipment'
+              example:
+                - equipmentId: eq_123
+                  name: Professional Camera
+                  description: High-end DSLR camera
+                  category: Photography
+                  dailyRate: 50.00
+                  condition: EXCELLENT
+                - equipmentId: eq_456
+                  name: Mountain Bike
+                  description: 21-speed mountain bike
+                  category: Sports
+                  dailyRate: 25.00
+                  condition: GOOD
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/equipment/{equipmentId}:
+    get:
+      summary: Get equipment by ID
+      description: Retrieves detailed information about a specific equipment item
+      tags:
+        - Equipment
+      parameters:
+        - $ref: '#/components/parameters/EquipmentId'
+      responses:
+        '200':
+          description: Equipment details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Equipment'
+              example:
+                equipmentId: eq_123
+                name: Professional Camera
+                description: High-end DSLR camera
+                category: Photography
+                dailyRate: 50.00
+                condition: EXCELLENT
+                isAvailable: true
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/members/{memberId}:
+    get:
+      summary: Get member by ID
+      description: Retrieves detailed information about a specific member
+      tags:
+        - Members
+      parameters:
+        - $ref: '#/components/parameters/MemberId'
+      responses:
+        '200':
+          description: Member details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Member'
+              example:
+                memberId: mem_789
+                name: John Doe
+                email: john.doe@example.com
+                tier: GOLD
+                joinDate: '2024-01-01T00:00:00.000Z'
+                isActive: true
+                activeRentalCount: 2
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/members/{memberId}/rentals:
+    get:
+      summary: Get member rentals
+      description: Retrieves all rentals for a specific member
+      tags:
+        - Members
+      parameters:
+        - $ref: '#/components/parameters/MemberId'
+      responses:
+        '200':
+          description: List of member rentals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MemberRental'
+              example:
+                - rentalId: rent_001
+                  equipmentId: eq_123
+                  equipmentName: Professional Camera
+                  startDate: '2024-01-10T00:00:00.000Z'
+                  endDate: '2024-01-15T00:00:00.000Z'
+                  status: ACTIVE
+                  totalCost: 250.00
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/rentals:
+    post:
+      summary: Create a new rental
+      description: Creates a new rental for a member with payment processing
+      tags:
+        - Rentals
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRentalRequest'
+            example:
+              equipmentId: eq_123
+              memberId: mem_789
+              startDate: '2024-01-15T00:00:00.000Z'
+              endDate: '2024-01-20T00:00:00.000Z'
+              paymentMethod:
+                type: credit_card
+                token: tok_visa_4242
+              notificationChannel: EMAIL
+      responses:
+        '201':
+          description: Rental created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateRentalResponse'
+              example:
+                rentalId: rent_001
+                totalCost: 225.00
+                discountApplied: 25.00
+                transactionId: txn_123456
+                paymentStatus: succeeded
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/rentals/{rentalId}:
+    get:
+      summary: Get rental by ID
+      description: Retrieves detailed information about a specific rental
+      tags:
+        - Rentals
+      parameters:
+        - $ref: '#/components/parameters/RentalId'
+      responses:
+        '200':
+          description: Rental details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Rental'
+              example:
+                rentalId: rent_001
+                equipmentId: eq_123
+                memberId: mem_789
+                startDate: '2024-01-15T00:00:00.000Z'
+                endDate: '2024-01-20T00:00:00.000Z'
+                status: ACTIVE
+                totalCost: 225.00
+                conditionAtStart: EXCELLENT
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/rentals/{rentalId}/return:
+    put:
+      summary: Return a rental
+      description: Processes the return of rented equipment with condition assessment
+      tags:
+        - Rentals
+      parameters:
+        - $ref: '#/components/parameters/RentalId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReturnRentalRequest'
+            example:
+              conditionAtReturn: GOOD
+              paymentMethod:
+                type: credit_card
+                token: tok_visa_4242
+              notificationChannel: EMAIL
+      responses:
+        '200':
+          description: Rental returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReturnRentalResponse'
+              example:
+                rentalId: rent_001
+                totalCost: 225.00
+                lateFee: 0.00
+                damageFee: 0.00
+                transactionId: txn_789012
+                paymentStatus: succeeded
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/rentals/{rentalId}/extend:
+    put:
+      summary: Extend a rental
+      description: Extends the rental period for additional days with payment
+      tags:
+        - Rentals
+      parameters:
+        - $ref: '#/components/parameters/RentalId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExtendRentalRequest'
+            example:
+              additionalDays: 3
+              paymentMethod:
+                type: credit_card
+                token: tok_visa_4242
+              notificationChannel: EMAIL
+      responses:
+        '200':
+          description: Rental extended successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExtendRentalResponse'
+              example:
+                rentalId: rent_001
+                newEndDate: '2024-01-23T00:00:00.000Z'
+                additionalCost: 135.00
+                transactionId: txn_345678
+                paymentStatus: succeeded
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/rentals/status/overdue:
+    get:
+      summary: Get overdue rentals
+      description: Retrieves all rentals that are past their due date
+      tags:
+        - Rentals
+      responses:
+        '200':
+          description: List of overdue rentals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Rental'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/rentals/member/{memberId}:
+    get:
+      summary: Get rentals by member
+      description: Retrieves all rentals for a specific member (alias endpoint)
+      tags:
+        - Rentals
+      parameters:
+        - $ref: '#/components/parameters/MemberId'
+      responses:
+        '200':
+          description: List of member rentals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MemberRental'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/reservations:
+    post:
+      summary: Create a new reservation
+      description: Creates a new reservation for future equipment rental
+      tags:
+        - Reservations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReservationRequest'
+            example:
+              equipmentId: eq_123
+              memberId: mem_789
+              startDate: '2024-02-01T00:00:00.000Z'
+              endDate: '2024-02-05T00:00:00.000Z'
+              paymentMethod:
+                type: credit_card
+                token: tok_visa_4242
+              authorizePayment: true
+              notificationChannel: EMAIL
+      responses:
+        '201':
+          description: Reservation created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateReservationResponse'
+              example:
+                reservationId: res_001
+                equipmentName: Professional Camera
+                startDate: '2024-02-01T00:00:00.000Z'
+                endDate: '2024-02-05T00:00:00.000Z'
+                authorizationId: auth_123456
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/reservations/{reservationId}:
+    get:
+      summary: Get reservation by ID
+      description: Retrieves detailed information about a specific reservation
+      tags:
+        - Reservations
+      parameters:
+        - $ref: '#/components/parameters/ReservationId'
+      responses:
+        '200':
+          description: Reservation details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+              example:
+                reservationId: res_001
+                equipmentId: eq_123
+                memberId: mem_789
+                startDate: '2024-02-01T00:00:00.000Z'
+                endDate: '2024-02-05T00:00:00.000Z'
+                status: PENDING
+                createdAt: '2024-01-15T10:00:00.000Z'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/reservations/{reservationId}/cancel:
+    put:
+      summary: Cancel a reservation
+      description: Cancels an existing reservation and processes refunds if applicable
+      tags:
+        - Reservations
+      parameters:
+        - $ref: '#/components/parameters/ReservationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelReservationRequest'
+            example:
+              reason: Changed plans
+              authorizationId: auth_123456
+              notificationChannel: EMAIL
+      responses:
+        '200':
+          description: Reservation cancelled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancelReservationResponse'
+              example:
+                reservationId: res_001
+                cancelledAt: '2024-01-15T11:00:00.000Z'
+                refundAmount: 200.00
+                refundTransactionId: ref_123456
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/reservations/{reservationId}/confirm:
+    put:
+      summary: Confirm a reservation
+      description: Confirms a pending reservation
+      tags:
+        - Reservations
+      parameters:
+        - $ref: '#/components/parameters/ReservationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmReservationRequest'
+            example:
+              notificationChannel: EMAIL
+      responses:
+        '200':
+          description: Reservation confirmed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfirmReservationResponse'
+              example:
+                reservationId: res_001
+                confirmedAt: '2024-01-15T12:00:00.000Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/reservations/{reservationId}/fulfill:
+    post:
+      summary: Fulfill a reservation
+      description: Converts a confirmed reservation into an active rental
+      tags:
+        - Reservations
+      parameters:
+        - $ref: '#/components/parameters/ReservationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FulfillReservationRequest'
+            example:
+              paymentMethod:
+                type: credit_card
+                token: tok_visa_4242
+              authorizationId: auth_123456
+              notificationChannel: EMAIL
+      responses:
+        '200':
+          description: Reservation fulfilled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FulfillReservationResponse'
+              example:
+                reservationId: res_001
+                rentalId: rent_002
+                totalCost: 200.00
+                transactionId: txn_999888
+                paymentStatus: succeeded
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  parameters:
+    EquipmentId:
+      name: equipmentId
+      in: path
+      required: true
+      description: Unique identifier for the equipment
+      schema:
+        type: string
+        example: eq_123
+
+    MemberId:
+      name: memberId
+      in: path
+      required: true
+      description: Unique identifier for the member
+      schema:
+        type: string
+        example: mem_789
+
+    RentalId:
+      name: rentalId
+      in: path
+      required: true
+      description: Unique identifier for the rental
+      schema:
+        type: string
+        example: rent_001
+
+    ReservationId:
+      name: reservationId
+      in: path
+      required: true
+      description: Unique identifier for the reservation
+      schema:
+        type: string
+        example: res_001
+
+  schemas:
+    # Health Check
+    HealthCheckResponse:
+      type: object
+      required:
+        - status
+        - timestamp
+        - service
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+          description: Current health status of the service
+        timestamp:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp of the health check
+        service:
+          type: string
+          description: Name of the service
+
+    # Equipment Schemas
+    AvailableEquipment:
+      type: object
+      required:
+        - equipmentId
+        - name
+        - description
+        - category
+        - dailyRate
+        - condition
+      properties:
+        equipmentId:
+          type: string
+          description: Unique identifier for the equipment
+        name:
+          type: string
+          description: Name of the equipment
+        description:
+          type: string
+          description: Detailed description
+        category:
+          type: string
+          description: Equipment category
+        dailyRate:
+          type: number
+          format: float
+          description: Daily rental rate in dollars
+        condition:
+          type: string
+          enum: [EXCELLENT, GOOD, FAIR, POOR, NEEDS_MAINTENANCE, RETIRED]
+          description: Current condition of the equipment
+
+    Equipment:
+      allOf:
+        - $ref: '#/components/schemas/AvailableEquipment'
+        - type: object
+          required:
+            - isAvailable
+          properties:
+            isAvailable:
+              type: boolean
+              description: Whether equipment is currently available
+            currentRentalId:
+              type: string
+              description: ID of current rental if equipment is rented
+
+    # Member Schemas
+    Member:
+      type: object
+      required:
+        - memberId
+        - name
+        - email
+        - tier
+        - joinDate
+        - isActive
+        - activeRentalCount
+      properties:
+        memberId:
+          type: string
+          description: Unique identifier for the member
+        name:
+          type: string
+          description: Full name of the member
+        email:
+          type: string
+          format: email
+          description: Email address
+        tier:
+          type: string
+          enum: [BASIC, SILVER, GOLD, PLATINUM]
+          description: Membership tier level
+        joinDate:
+          type: string
+          format: date-time
+          description: Date when member joined
+        isActive:
+          type: boolean
+          description: Whether member account is active
+        activeRentalCount:
+          type: number
+          description: Number of active rentals
+
+    MemberRental:
+      type: object
+      required:
+        - rentalId
+        - equipmentId
+        - equipmentName
+        - startDate
+        - endDate
+        - status
+        - totalCost
+      properties:
+        rentalId:
+          type: string
+          description: Unique identifier for the rental
+        equipmentId:
+          type: string
+          description: ID of rented equipment
+        equipmentName:
+          type: string
+          description: Name of rented equipment
+        startDate:
+          type: string
+          format: date-time
+          description: Rental start date
+        endDate:
+          type: string
+          format: date-time
+          description: Rental end date
+        status:
+          type: string
+          enum: [ACTIVE, RETURNED, OVERDUE, CANCELLED]
+          description: Current rental status
+        totalCost:
+          type: number
+          format: float
+          description: Total cost of rental
+
+    # Rental Schemas
+    CreateRentalRequest:
+      type: object
+      required:
+        - equipmentId
+        - memberId
+        - startDate
+        - endDate
+        - paymentMethod
+      properties:
+        equipmentId:
+          type: string
+          description: ID of equipment to rent
+        memberId:
+          type: string
+          description: ID of member creating rental
+        startDate:
+          type: string
+          format: date-time
+          description: Rental start date (ISO 8601)
+        endDate:
+          type: string
+          format: date-time
+          description: Rental end date (ISO 8601)
+        paymentMethod:
+          $ref: '#/components/schemas/PaymentMethod'
+        notificationChannel:
+          type: string
+          enum: [EMAIL, SMS]
+          description: Preferred notification channel
+
+    CreateRentalResponse:
+      type: object
+      required:
+        - rentalId
+        - totalCost
+        - discountApplied
+        - transactionId
+        - paymentStatus
+      properties:
+        rentalId:
+          type: string
+          description: Unique identifier for the created rental
+        totalCost:
+          type: number
+          format: float
+          description: Total cost after discounts
+        discountApplied:
+          type: number
+          format: float
+          description: Amount of discount applied
+        transactionId:
+          type: string
+          description: Payment transaction ID
+        paymentStatus:
+          type: string
+          enum: [succeeded, pending, failed]
+          description: Status of payment
+
+    ReturnRentalRequest:
+      type: object
+      required:
+        - conditionAtReturn
+      properties:
+        conditionAtReturn:
+          type: string
+          enum: [EXCELLENT, GOOD, FAIR, POOR, NEEDS_MAINTENANCE]
+          description: Condition of equipment upon return
+        paymentMethod:
+          $ref: '#/components/schemas/PaymentMethod'
+        notificationChannel:
+          type: string
+          enum: [EMAIL, SMS]
+          description: Preferred notification channel
+
+    ReturnRentalResponse:
+      type: object
+      required:
+        - rentalId
+        - totalCost
+        - lateFee
+        - damageFee
+      properties:
+        rentalId:
+          type: string
+          description: ID of returned rental
+        totalCost:
+          type: number
+          format: float
+          description: Total cost including fees
+        lateFee:
+          type: number
+          format: float
+          description: Late fee charged
+        damageFee:
+          type: number
+          format: float
+          description: Damage fee charged
+        transactionId:
+          type: string
+          description: Payment transaction ID for fees
+        paymentStatus:
+          type: string
+          enum: [succeeded, pending, failed]
+          description: Status of fee payment
+        refundTransactionId:
+          type: string
+          description: Refund transaction ID if applicable
+        refundAmount:
+          type: number
+          format: float
+          description: Amount refunded if applicable
+
+    ExtendRentalRequest:
+      type: object
+      required:
+        - additionalDays
+        - paymentMethod
+      properties:
+        additionalDays:
+          type: number
+          description: Number of days to extend
+          minimum: 1
+        paymentMethod:
+          $ref: '#/components/schemas/PaymentMethod'
+        notificationChannel:
+          type: string
+          enum: [EMAIL, SMS]
+          description: Preferred notification channel
+
+    ExtendRentalResponse:
+      type: object
+      required:
+        - rentalId
+        - newEndDate
+        - additionalCost
+        - transactionId
+        - paymentStatus
+      properties:
+        rentalId:
+          type: string
+          description: ID of extended rental
+        newEndDate:
+          type: string
+          format: date-time
+          description: New end date after extension
+        additionalCost:
+          type: number
+          format: float
+          description: Cost of extension
+        transactionId:
+          type: string
+          description: Payment transaction ID
+        paymentStatus:
+          type: string
+          enum: [succeeded, pending, failed]
+          description: Status of payment
+
+    Rental:
+      type: object
+      required:
+        - rentalId
+        - equipmentId
+        - memberId
+        - startDate
+        - endDate
+        - status
+        - totalCost
+        - conditionAtStart
+      properties:
+        rentalId:
+          type: string
+          description: Unique identifier for the rental
+        equipmentId:
+          type: string
+          description: ID of rented equipment
+        memberId:
+          type: string
+          description: ID of member who rented
+        startDate:
+          type: string
+          format: date-time
+          description: Rental start date
+        endDate:
+          type: string
+          format: date-time
+          description: Rental end date
+        status:
+          type: string
+          enum: [ACTIVE, RETURNED, OVERDUE, CANCELLED]
+          description: Current rental status
+        totalCost:
+          type: number
+          format: float
+          description: Total cost of rental
+        conditionAtStart:
+          type: string
+          enum: [EXCELLENT, GOOD, FAIR, POOR]
+          description: Equipment condition at rental start
+        conditionAtReturn:
+          type: string
+          enum: [EXCELLENT, GOOD, FAIR, POOR, NEEDS_MAINTENANCE]
+          description: Equipment condition at return
+        actualReturnDate:
+          type: string
+          format: date-time
+          description: Actual date equipment was returned
+        lateFee:
+          type: number
+          format: float
+          description: Late fee if applicable
+
+    # Reservation Schemas
+    CreateReservationRequest:
+      type: object
+      required:
+        - equipmentId
+        - memberId
+        - startDate
+        - endDate
+      properties:
+        equipmentId:
+          type: string
+          description: ID of equipment to reserve
+        memberId:
+          type: string
+          description: ID of member creating reservation
+        startDate:
+          type: string
+          format: date-time
+          description: Reservation start date (ISO 8601)
+        endDate:
+          type: string
+          format: date-time
+          description: Reservation end date (ISO 8601)
+        paymentMethod:
+          $ref: '#/components/schemas/PaymentMethod'
+        authorizePayment:
+          type: boolean
+          description: Whether to authorize payment upfront
+          default: false
+        notificationChannel:
+          type: string
+          enum: [EMAIL, SMS]
+          description: Preferred notification channel
+
+    CreateReservationResponse:
+      type: object
+      required:
+        - reservationId
+        - equipmentName
+        - startDate
+        - endDate
+      properties:
+        reservationId:
+          type: string
+          description: Unique identifier for the reservation
+        equipmentName:
+          type: string
+          description: Name of reserved equipment
+        startDate:
+          type: string
+          format: date-time
+          description: Reservation start date
+        endDate:
+          type: string
+          format: date-time
+          description: Reservation end date
+        authorizationId:
+          type: string
+          description: Payment authorization ID if applicable
+
+    CancelReservationRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          description: Reason for cancellation
+        authorizationId:
+          type: string
+          description: Payment authorization ID to release
+        notificationChannel:
+          type: string
+          enum: [EMAIL, SMS]
+          description: Preferred notification channel
+
+    CancelReservationResponse:
+      type: object
+      required:
+        - reservationId
+        - cancelledAt
+      properties:
+        reservationId:
+          type: string
+          description: ID of cancelled reservation
+        cancelledAt:
+          type: string
+          format: date-time
+          description: Timestamp of cancellation
+        refundAmount:
+          type: number
+          format: float
+          description: Amount refunded if applicable
+        refundTransactionId:
+          type: string
+          description: Refund transaction ID if applicable
+
+    ConfirmReservationRequest:
+      type: object
+      properties:
+        notificationChannel:
+          type: string
+          enum: [EMAIL, SMS]
+          description: Preferred notification channel
+
+    ConfirmReservationResponse:
+      type: object
+      required:
+        - reservationId
+        - confirmedAt
+      properties:
+        reservationId:
+          type: string
+          description: ID of confirmed reservation
+        confirmedAt:
+          type: string
+          format: date-time
+          description: Timestamp of confirmation
+
+    FulfillReservationRequest:
+      type: object
+      required:
+        - paymentMethod
+      properties:
+        paymentMethod:
+          $ref: '#/components/schemas/PaymentMethod'
+        authorizationId:
+          type: string
+          description: Payment authorization ID to capture
+        notificationChannel:
+          type: string
+          enum: [EMAIL, SMS]
+          description: Preferred notification channel
+
+    FulfillReservationResponse:
+      type: object
+      required:
+        - reservationId
+        - rentalId
+        - totalCost
+        - transactionId
+        - paymentStatus
+      properties:
+        reservationId:
+          type: string
+          description: ID of fulfilled reservation
+        rentalId:
+          type: string
+          description: ID of created rental
+        totalCost:
+          type: number
+          format: float
+          description: Total rental cost
+        transactionId:
+          type: string
+          description: Payment transaction ID
+        paymentStatus:
+          type: string
+          enum: [succeeded, pending, failed]
+          description: Status of payment
+
+    Reservation:
+      type: object
+      required:
+        - reservationId
+        - equipmentId
+        - memberId
+        - startDate
+        - endDate
+        - status
+        - createdAt
+      properties:
+        reservationId:
+          type: string
+          description: Unique identifier for the reservation
+        equipmentId:
+          type: string
+          description: ID of reserved equipment
+        memberId:
+          type: string
+          description: ID of member who reserved
+        startDate:
+          type: string
+          format: date-time
+          description: Reservation start date
+        endDate:
+          type: string
+          format: date-time
+          description: Reservation end date
+        status:
+          type: string
+          enum: [PENDING, CONFIRMED, FULFILLED, CANCELLED, EXPIRED]
+          description: Current reservation status
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when reservation was created
+
+    # Common Schemas
+    PaymentMethod:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          description: Type of payment method
+          enum: [credit_card, debit_card, cash]
+        token:
+          type: string
+          description: Payment token from payment provider
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              description: Machine-readable error code
+            message:
+              type: string
+              description: Human-readable error message
+            details:
+              type: object
+              description: Additional error details
+              additionalProperties: true
+
+    ValidationErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              enum: [VALIDATION_ERROR]
+              description: Validation error code
+            message:
+              type: string
+              description: Human-readable error message
+            fields:
+              type: array
+              description: List of field validation errors
+              items:
+                type: object
+                required:
+                  - field
+                  - message
+                properties:
+                  field:
+                    type: string
+                    description: Field name with error
+                  message:
+                    type: string
+                    description: Validation error message
+
+  responses:
+    BadRequest:
+      description: Invalid request parameters or validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationErrorResponse'
+          example:
+            error:
+              code: VALIDATION_ERROR
+              message: Invalid request parameters
+              fields:
+                - field: startDate
+                  message: Start date must be in the future
+                - field: endDate
+                  message: End date must be after start date
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            equipmentNotFound:
+              value:
+                error:
+                  code: EQUIPMENT_NOT_FOUND
+                  message: Equipment not found
+                  details:
+                    equipmentId: eq_123
+            memberNotFound:
+              value:
+                error:
+                  code: MEMBER_NOT_FOUND
+                  message: Member not found
+                  details:
+                    memberId: mem_789
+            rentalNotFound:
+              value:
+                error:
+                  code: RENTAL_NOT_FOUND
+                  message: Rental not found
+                  details:
+                    rentalId: rent_001
+
+    Conflict:
+      description: Resource conflict or business rule violation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            equipmentNotAvailable:
+              value:
+                error:
+                  code: EQUIPMENT_NOT_AVAILABLE
+                  message: Equipment is not available for the requested period
+                  details:
+                    equipmentId: eq_123
+                    startDate: '2024-01-15'
+                    endDate: '2024-01-20'
+            rentalAlreadyReturned:
+              value:
+                error:
+                  code: RENTAL_ALREADY_RETURNED
+                  message: Rental has already been returned
+                  details:
+                    rentalId: rent_001
+
+    Forbidden:
+      description: Operation not allowed due to business rules
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            memberSuspended:
+              value:
+                error:
+                  code: MEMBER_SUSPENDED
+                  message: Member account is suspended
+                  details:
+                    memberId: mem_789
+            rentalLimitExceeded:
+              value:
+                error:
+                  code: RENTAL_LIMIT_EXCEEDED
+                  message: Member has reached maximum number of active rentals
+                  details:
+                    memberId: mem_789
+                    limit: 5
+                    current: 5
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: INTERNAL_SERVER_ERROR
+              message: An unexpected error occurred

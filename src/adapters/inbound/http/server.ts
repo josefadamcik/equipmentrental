@@ -1,4 +1,5 @@
 import express, { Express, json } from 'express';
+import swaggerUi from 'swagger-ui-express';
 import { RentalController } from './controllers/RentalController.js';
 import { EquipmentController } from './controllers/EquipmentController.js';
 import { MemberController } from './controllers/MemberController.js';
@@ -6,6 +7,7 @@ import { ReservationController } from './controllers/ReservationController.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import { ILogger } from '../../../infrastructure/logging/Logger.js';
 import { createRequestLogger } from '../../../infrastructure/logging/RequestLogger.js';
+import { createSwaggerConfig } from '../../../infrastructure/swagger/swagger.config.js';
 
 /**
  * Configuration for the HTTP server
@@ -43,6 +45,20 @@ export function createServer(config: ServerConfig): Express {
     });
   });
 
+  // API Documentation (Swagger UI)
+  try {
+    const swaggerConfig = createSwaggerConfig();
+    app.use(
+      swaggerConfig.path,
+      swaggerUi.serve,
+      swaggerUi.setup(swaggerConfig.spec, swaggerConfig.uiOptions),
+    );
+    config.logger.info('Swagger UI configured', { path: swaggerConfig.path });
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error(String(err));
+    config.logger.error('Failed to configure Swagger UI', error);
+  }
+
   // API Routes
   app.use('/api/rentals', config.rentalController.getRouter());
   app.use('/api/equipment', config.equipmentController.getRouter());
@@ -67,6 +83,7 @@ export function startServer(app: Express, port: number, logger: ILogger): void {
       port,
       healthCheckUrl: `http://localhost:${port}/health`,
       apiBaseUrl: `http://localhost:${port}/api`,
+      apiDocsUrl: `http://localhost:${port}/api-docs`,
     });
   });
 }

@@ -69,4 +69,21 @@ describe('Server', () => {
       expect(app).toBeDefined();
     });
   });
+
+  describe('API Documentation', () => {
+    it('should serve Swagger UI at /api-docs', async () => {
+      const response = await request(app).get('/api-docs/');
+
+      // Swagger UI typically redirects or returns HTML
+      expect([200, 301, 302]).toContain(response.status);
+    });
+
+    it('should have Swagger UI assets available', async () => {
+      // Try to access swagger-ui assets (they should be served)
+      const response = await request(app).get('/api-docs');
+
+      // Should either return HTML or redirect
+      expect(response.status).toBeLessThan(500);
+    });
+  });
 });
