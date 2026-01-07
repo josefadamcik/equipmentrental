@@ -1,5 +1,10 @@
 # Equipment Rental System
 
+[![CI](https://github.com/YOUR_USERNAME/equipmentrental/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_USERNAME/equipmentrental/actions/workflows/ci.yml)
+[![Docker](https://github.com/YOUR_USERNAME/equipmentrental/actions/workflows/docker.yml/badge.svg)](https://github.com/YOUR_USERNAME/equipmentrental/actions/workflows/docker.yml)
+[![Security](https://github.com/YOUR_USERNAME/equipmentrental/actions/workflows/security.yml/badge.svg)](https://github.com/YOUR_USERNAME/equipmentrental/actions/workflows/security.yml)
+[![codecov](https://codecov.io/gh/YOUR_USERNAME/equipmentrental/branch/master/graph/badge.svg)](https://codecov.io/gh/YOUR_USERNAME/equipmentrental)
+
 A demonstration of **Hexagonal Architecture** (Ports and Adapters) implementation in Node.js and TypeScript.
 
 ## Overview
@@ -308,6 +313,111 @@ docker-compose restart app
 docker-compose up -d --scale app=3
 ```
 
+## CI/CD Pipeline
+
+This project uses GitHub Actions for continuous integration and deployment.
+
+### Workflows
+
+#### CI Workflow (`.github/workflows/ci.yml`)
+Runs on every push and pull request to main branches:
+
+- **Lint**: ESLint and Prettier checks
+- **Type Check**: TypeScript compilation validation
+- **Test**: Unit, integration, and E2E tests on Node.js 18, 20, 22
+- **Build**: TypeScript compilation and artifact creation
+- **Integration Tests**: Full test suite against PostgreSQL database
+
+#### Docker Workflow (`.github/workflows/docker.yml`)
+Builds and publishes Docker images:
+
+- **Multi-platform builds**: AMD64 and ARM64 support
+- **Image registries**: GitHub Container Registry and Docker Hub
+- **Security scanning**: Trivy vulnerability scanner
+- **Tagging strategy**: Branch names, semver tags, git SHA, latest
+
+#### Release Workflow (`.github/workflows/release.yml`)
+Automated releases on version tags:
+
+- **GitHub Releases**: Automatic changelog generation
+- **Release artifacts**: Tarball with compiled code
+- **Deployment**: Staging and production deployment automation
+- **Smoke tests**: Post-deployment verification
+
+#### Security Workflow (`.github/workflows/security.yml`)
+Daily security scans and PR reviews:
+
+- **Dependency Review**: Check new dependencies in PRs
+- **NPM Audit**: Vulnerability scanning
+- **CodeQL**: Static code analysis for security issues
+- **Secrets Scanning**: Detect accidentally committed secrets
+- **License Check**: Ensure compatible open-source licenses
+- **SBOM Generation**: Software Bill of Materials for compliance
+
+### Setting Up CI/CD
+
+#### Required Secrets
+
+Configure these in your GitHub repository settings (Settings → Secrets and variables → Actions):
+
+**Docker Hub (optional):**
+- `DOCKERHUB_USERNAME`: Your Docker Hub username
+- `DOCKERHUB_TOKEN`: Docker Hub access token
+
+**Codecov (optional):**
+- `CODECOV_TOKEN`: Token from codecov.io for coverage reports
+
+#### Branch Protection
+
+Recommended branch protection rules for `main`/`master`:
+
+1. **Require pull request reviews**: At least 1 approval
+2. **Require status checks**: All CI jobs must pass
+3. **Require branches to be up to date**: Prevent stale PRs
+4. **Include administrators**: Apply rules to everyone
+
+### Local CI Testing
+
+Run the same checks locally before pushing:
+
+```bash
+# Run all quality checks
+npm run typecheck    # Type checking
+npm run lint         # Linting
+npm run format:check # Format checking
+npm test             # All tests
+npm run build        # Build verification
+
+# Or run them all at once
+npm run typecheck && npm run lint && npm run format:check && npm test && npm run build
+```
+
+### Release Process
+
+1. **Update version** in `package.json`:
+   ```bash
+   npm version patch  # 1.0.0 → 1.0.1
+   npm version minor  # 1.0.0 → 1.1.0
+   npm version major  # 1.0.0 → 2.0.0
+   ```
+
+2. **Push tags**:
+   ```bash
+   git push origin master --tags
+   ```
+
+3. **Automated actions**:
+   - GitHub Release created with changelog
+   - Docker images built and pushed
+   - Deployment to staging (RC and stable releases)
+   - Deployment to production (stable releases only)
+
+### Deployment Environments
+
+- **Staging**: Auto-deployed on RC releases (`v*.*.*-rc*`)
+- **Production**: Auto-deployed on stable releases (`v*.*.*`)
+- **Manual approval**: Production deployments require approval in GitHub
+
 ## Technology Stack
 
 - **Runtime**: Node.js (ES Modules)
@@ -320,6 +430,8 @@ docker-compose up -d --scale app=3
 - **Containerization**: Docker and Docker Compose
 - **Database**: PostgreSQL 16 (production), SQLite (local dev)
 - **Caching**: Redis 7
+- **CI/CD**: GitHub Actions
+- **Security**: CodeQL, Trivy, TruffleHog, npm audit
 
 ## Future Enhancements
 

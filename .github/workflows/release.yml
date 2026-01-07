@@ -1,0 +1,142 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build project
+        run: npm run build
+
+      - name: Create release archive
+        run: |
+          mkdir -p release
+          cp -r dist release/
+          cp package.json package-lock.json release/
+          cp -r prisma release/
+          cp .env.example release/
+          cp README.md release/
+          cd release
+          tar -czf ../equipment-rental-system-${{ github.ref_name }}.tar.gz *
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Get the previous tag
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+
+          if [ -z "$PREVIOUS_TAG" ]; then
+            # First release, get all commits
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" --no-merges)
+          else
+            # Get commits since previous tag
+            CHANGELOG=$(git log ${PREVIOUS_TAG}..HEAD --pretty=format:"- %s (%h)" --no-merges)
+          fi
+
+          # Save changelog to file
+          echo "## Changes" > changelog.md
+          echo "" >> changelog.md
+          echo "$CHANGELOG" >> changelog.md
+
+          # Output for GitHub Actions
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          cat changelog.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body: ${{ steps.changelog.outputs.changelog }}
+          files: |
+            equipment-rental-system-${{ github.ref_name }}.tar.gz
+          draft: false
+          prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: create-release
+    if: "!contains(github.ref_name, 'alpha') && !contains(github.ref_name, 'beta')"
+    environment:
+      name: staging
+      url: https://staging.equipmentrental.example.com
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to staging server
+        run: |
+          echo "Deploying version ${{ github.ref_name }} to staging..."
+          # Add actual deployment commands here
+          # Example: SSH deployment, Kubernetes apply, etc.
+          # ssh deploy@staging "cd /app && ./deploy.sh ${{ github.ref_name }}"
+
+      - name: Run smoke tests
+        run: |
+          echo "Running smoke tests against staging..."
+          # Add smoke test commands here
+          # Example: curl health checks, basic API tests, etc.
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    if: "!contains(github.ref_name, 'alpha') && !contains(github.ref_name, 'beta') && !contains(github.ref_name, 'rc')"
+    environment:
+      name: production
+      url: https://equipmentrental.example.com
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to production server
+        run: |
+          echo "Deploying version ${{ github.ref_name }} to production..."
+          # Add actual deployment commands here
+          # Example: Blue-green deployment, rolling update, etc.
+          # kubectl set image deployment/equipment-rental app=equipment-rental:${{ github.ref_name }}
+
+      - name: Verify deployment
+        run: |
+          echo "Verifying production deployment..."
+          # Add verification commands here
+          # Example: Health checks, critical path tests, etc.
+
+      - name: Notify team
+        if: always()
+        run: |
+          echo "Notifying team of deployment status..."
+          # Add notification commands here
+          # Example: Slack webhook, email, etc.

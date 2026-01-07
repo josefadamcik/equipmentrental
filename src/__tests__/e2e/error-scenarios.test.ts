@@ -410,8 +410,8 @@ describe('E2E: Error Scenarios and Edge Cases', () => {
         request(context.app)
           .post('/api/rentals')
           .send({
-            equipmentId: eq1.getId().toString(),
-            memberId: basicMember.getId().toString(),
+            equipmentId: eq1.id.toString(),
+            memberId: basicMember.id.toString(),
             startDate: new Date('2024-01-01T00:00:00Z').toISOString(),
             endDate: new Date('2024-01-06T00:00:00Z').toISOString(), // 5 days
             paymentMethod: { type: 'CREDIT_CARD' },
@@ -419,8 +419,8 @@ describe('E2E: Error Scenarios and Edge Cases', () => {
         request(context.app)
           .post('/api/rentals')
           .send({
-            equipmentId: eq2.getId().toString(),
-            memberId: standardMember.getId().toString(),
+            equipmentId: eq2.id.toString(),
+            memberId: standardMember.id.toString(),
             startDate: new Date('2024-01-01T00:00:00Z').toISOString(),
             endDate: new Date('2024-01-06T00:00:00Z').toISOString(),
             paymentMethod: { type: 'CREDIT_CARD' },
@@ -428,8 +428,8 @@ describe('E2E: Error Scenarios and Edge Cases', () => {
         request(context.app)
           .post('/api/rentals')
           .send({
-            equipmentId: eq3.getId().toString(),
-            memberId: premiumMember.getId().toString(),
+            equipmentId: eq3.id.toString(),
+            memberId: premiumMember.id.toString(),
             startDate: new Date('2024-01-01T00:00:00Z').toISOString(),
             endDate: new Date('2024-01-06T00:00:00Z').toISOString(),
             paymentMethod: { type: 'CREDIT_CARD' },
