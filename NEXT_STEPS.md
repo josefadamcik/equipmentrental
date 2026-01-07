@@ -517,17 +517,42 @@ Test complete flows through HTTP endpoints:
 
 ## Phase 6: Documentation and Deployment
 
-### 6.1 API Documentation
+### 6.1 API Documentation ✅ COMPLETED
 Document the REST API:
 
-- [ ] Use Swagger/OpenAPI
-- [ ] Document all endpoints
-- [ ] Provide example requests/responses
+- [x] Use Swagger/OpenAPI
+- [x] Document all endpoints
+- [x] Provide example requests/responses
 
-**Install tools**:
-```bash
-npm install swagger-ui-express @types/swagger-ui-express
-```
+**Files created**:
+- ✅ `src/infrastructure/swagger/openapi.yaml` - Complete OpenAPI 3.0.3 specification
+- ✅ `src/infrastructure/swagger/swagger.config.ts` - Swagger configuration and setup
+- ✅ `src/infrastructure/swagger/__tests__/swagger.config.test.ts` - Comprehensive tests
+
+**Files modified**:
+- ✅ `src/adapters/inbound/http/server.ts` - Integrated Swagger UI middleware
+- ✅ `src/adapters/inbound/http/__tests__/server.test.ts` - Added API documentation tests
+
+**Test Coverage**: 1085 tests passing (24 new Swagger tests + 1061 previous tests)
+
+**Features implemented**:
+- Complete OpenAPI 3.0.3 specification with all REST endpoints documented
+- Interactive Swagger UI accessible at /api-docs endpoint
+- Documented endpoints: Equipment, Members, Rentals, Reservations, Health check
+- Request/Response schemas with detailed examples for all operations
+- Reusable component schemas for DTOs and error responses
+- HTTP status codes (200, 201, 400, 403, 404, 409, 500) with examples
+- Tags and operation grouping for better organization
+- Custom Swagger UI styling and configuration options
+- Fallback to swagger-jsdoc if YAML file unavailable
+- Environment-agnostic path resolution using process.cwd()
+
+**Dependencies installed**:
+- swagger-ui-express - Swagger UI middleware for Express
+- swagger-jsdoc - JSDoc-based OpenAPI generator (alternative approach)
+- @types/swagger-ui-express - TypeScript types
+- @types/swagger-jsdoc - TypeScript types
+- yaml - YAML parser for OpenAPI specification
 
 ### 6.2 Docker Setup
 Containerize the application:
