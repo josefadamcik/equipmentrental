@@ -72,11 +72,12 @@ async function bootstrap(): Promise<void> {
           : undefined,
       prismaClient: useInMemoryAdapters
         ? undefined
-        : (() => {
+        : ((): PrismaClient => {
             const adapter = new PrismaLibSql({
               url: `file:${config.database.url.replace('file:', '')}`,
             });
             return new PrismaClient({
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               adapter: adapter as any,
               log: config.database.logQueries
                 ? ['query', 'info', 'warn', 'error']
