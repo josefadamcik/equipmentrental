@@ -105,6 +105,17 @@ export class RentalController {
         return;
       }
 
+      // Validate end date is after start date
+      if (endDate <= startDate) {
+        res.status(400).json({
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'End date must be after start date',
+          },
+        });
+        return;
+      }
+
       // Map payment method (currently we just use the type, token handling would be in payment adapter)
       const paymentMethod = body.paymentMethod.type as PaymentMethod;
 

@@ -111,11 +111,24 @@ export class ReservationController {
         notificationChannel,
       });
 
+      // Fetch the created reservation for full details
+      const reservation = await this.reservationRepository.findById(
+        ReservationId.create(result.reservationId),
+      );
+
+      if (!reservation) {
+        throw new Error('Failed to retrieve created reservation');
+      }
+
       const response: CreateReservationResponse = {
         reservationId: result.reservationId,
+        equipmentId: reservation.equipmentId.toString(),
+        memberId: reservation.memberId.toString(),
         equipmentName: result.equipmentName,
         startDate: result.startDate.toISOString(),
         endDate: result.endDate.toISOString(),
+        status: reservation.status,
+        paymentStatus: result.authorizationId ? 'AUTHORIZED' : 'PENDING',
         authorizationId: result.authorizationId,
       };
 

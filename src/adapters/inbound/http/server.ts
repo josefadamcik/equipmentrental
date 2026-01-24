@@ -1,4 +1,4 @@
-import express, { Express, json } from 'express';
+import express, { Express, json, Request, Response, NextFunction } from 'express';
 import swaggerUi from 'swagger-ui-express';
 import { RentalController } from './controllers/RentalController.js';
 import { EquipmentController } from './controllers/EquipmentController.js';
@@ -28,6 +28,20 @@ export function createServer(config: ServerConfig): Express {
 
   // Middleware
   app.use(json()); // Parse JSON request bodies
+
+  // JSON parsing error handler
+  app.use((err: Error, _req: Request, res: Response, next: NextFunction) => {
+    if (err instanceof SyntaxError && 'status' in err && err.status === 400 && 'body' in err) {
+      res.status(400).json({
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Invalid JSON in request body',
+        },
+      });
+      return;
+    }
+    next(err);
+  });
 
   // Request logging middleware
   app.use(

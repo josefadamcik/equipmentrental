@@ -16,6 +16,7 @@ import { RentalCreated, RentalReturned, RentalOverdue } from '../../domain/event
 import {
   EquipmentNotAvailableError,
   EquipmentNotFoundError,
+  EquipmentConditionUnacceptableError,
 } from '../../domain/exceptions/EquipmentExceptions.js';
 import {
   MemberNotFoundError,
@@ -24,7 +25,7 @@ import {
   MemberHasOverdueRentalsError,
 } from '../../domain/exceptions/MemberExceptions.js';
 import { getMaxConcurrentRentals } from '../../domain/types/MembershipTier.js';
-import { EquipmentCondition } from '../../domain/types/EquipmentCondition.js';
+import { EquipmentCondition, isRentable } from '../../domain/types/EquipmentCondition.js';
 
 /**
  * Result of creating a rental with payment processing
@@ -102,6 +103,11 @@ export class RentalService {
 
     if (!equipment.isAvailable) {
       throw new EquipmentNotAvailableError(equipmentId.value, 'Equipment is currently rented');
+    }
+
+    // Validate equipment condition is acceptable for rental
+    if (!isRentable(equipment.condition)) {
+      throw new EquipmentConditionUnacceptableError(equipmentId.value, equipment.condition);
     }
 
     // Validate member exists and can rent

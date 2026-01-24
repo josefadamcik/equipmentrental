@@ -24,10 +24,16 @@ export interface CreateReservationRequest {
  */
 export interface CreateReservationResponse {
   reservationId: string;
+  equipmentId: string;
+  memberId: string;
   equipmentName: string;
   startDate: string; // ISO 8601 date string
   endDate: string; // ISO 8601 date string
+  status: string;
+  paymentStatus: string;
   authorizationId?: string;
+  totalCost?: number;
+  discountApplied?: number;
 }
 
 /**

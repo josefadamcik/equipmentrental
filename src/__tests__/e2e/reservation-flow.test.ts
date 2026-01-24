@@ -50,8 +50,8 @@ describe('E2E: Reservation System Flow', () => {
         .send({
           equipmentId: equipment.id.toString(),
           memberId: member.id.toString(),
-          startDate: new Date('2025-01-01T00:00:00Z').toISOString(),
-          endDate: new Date('2025-01-05T00:00:00Z').toISOString(),
+          startDate: new Date('2027-01-01T00:00:00Z').toISOString(),
+          endDate: new Date('2027-01-05T00:00:00Z').toISOString(),
           paymentMethod: { type: 'CREDIT_CARD', token: 'tok_test' },
         });
 
@@ -61,7 +61,7 @@ describe('E2E: Reservation System Flow', () => {
         reservationId: expect.any(String),
         equipmentId: equipment.id.toString(),
         memberId: member.id.toString(),
-        status: 'ACTIVE',
+        status: 'PENDING',
         paymentStatus: 'AUTHORIZED',
       });
 
@@ -91,8 +91,8 @@ describe('E2E: Reservation System Flow', () => {
         .send({
           equipmentId: equipment.id.toString(),
           memberId: premiumMember.id.toString(),
-          startDate: new Date('2025-01-01T00:00:00Z').toISOString(),
-          endDate: new Date('2025-01-06T00:00:00Z').toISOString(),
+          startDate: new Date('2027-01-01T00:00:00Z').toISOString(),
+          endDate: new Date('2027-01-06T00:00:00Z').toISOString(),
           paymentMethod: { type: 'CREDIT_CARD', token: 'tok_test' },
         });
 
@@ -122,8 +122,8 @@ describe('E2E: Reservation System Flow', () => {
         .send({
           equipmentId: equipment.id.toString(),
           memberId: member1.id.toString(),
-          startDate: new Date('2025-01-01T00:00:00Z').toISOString(),
-          endDate: new Date('2025-01-05T00:00:00Z').toISOString(),
+          startDate: new Date('2027-01-01T00:00:00Z').toISOString(),
+          endDate: new Date('2027-01-05T00:00:00Z').toISOString(),
           paymentMethod: { type: 'CREDIT_CARD', token: 'tok_test' },
         });
 
@@ -135,8 +135,8 @@ describe('E2E: Reservation System Flow', () => {
         .send({
           equipmentId: equipment.id.toString(),
           memberId: member2.id.toString(),
-          startDate: new Date('2025-01-03T00:00:00Z').toISOString(), // Overlaps with first
-          endDate: new Date('2025-01-07T00:00:00Z').toISOString(),
+          startDate: new Date('2027-01-03T00:00:00Z').toISOString(), // Overlaps with first
+          endDate: new Date('2027-01-07T00:00:00Z').toISOString(),
           paymentMethod: { type: 'CREDIT_CARD', token: 'tok_test' },
         });
 
@@ -165,8 +165,8 @@ describe('E2E: Reservation System Flow', () => {
         .send({
           equipmentId: equipment.id.toString(),
           memberId: member1.id.toString(),
-          startDate: new Date('2025-01-01T00:00:00Z').toISOString(),
-          endDate: new Date('2025-01-05T00:00:00Z').toISOString(),
+          startDate: new Date('2027-01-01T00:00:00Z').toISOString(),
+          endDate: new Date('2027-01-05T00:00:00Z').toISOString(),
           paymentMethod: { type: 'CREDIT_CARD', token: 'tok_test' },
         });
 
@@ -178,8 +178,8 @@ describe('E2E: Reservation System Flow', () => {
         .send({
           equipmentId: equipment.id.toString(),
           memberId: member2.id.toString(),
-          startDate: new Date('2025-01-06T00:00:00Z').toISOString(), // After first ends
-          endDate: new Date('2025-01-10T00:00:00Z').toISOString(),
+          startDate: new Date('2027-01-06T00:00:00Z').toISOString(), // After first ends
+          endDate: new Date('2027-01-10T00:00:00Z').toISOString(),
           paymentMethod: { type: 'CREDIT_CARD', token: 'tok_test' },
         });
 
@@ -205,8 +205,8 @@ describe('E2E: Reservation System Flow', () => {
         .send({
           equipmentId: equipment.id.toString(),
           memberId: member.id.toString(),
-          startDate: new Date('2025-01-01T00:00:00Z').toISOString(),
-          endDate: new Date('2025-01-05T00:00:00Z').toISOString(),
+          startDate: new Date('2027-01-01T00:00:00Z').toISOString(),
+          endDate: new Date('2027-01-05T00:00:00Z').toISOString(),
           paymentMethod: { type: 'CREDIT_CARD', token: 'tok_test' },
         });
 
@@ -243,8 +243,8 @@ describe('E2E: Reservation System Flow', () => {
         .send({
           equipmentId: equipment.id.toString(),
           memberId: member.id.toString(),
-          startDate: new Date('2025-01-01T00:00:00Z').toISOString(),
-          endDate: new Date('2025-01-05T00:00:00Z').toISOString(),
+          startDate: new Date('2027-01-01T00:00:00Z').toISOString(),
+          endDate: new Date('2027-01-05T00:00:00Z').toISOString(),
           paymentMethod: { type: 'CREDIT_CARD', token: 'tok_test' },
         });
 
@@ -277,8 +277,8 @@ describe('E2E: Reservation System Flow', () => {
         .send({
           equipmentId: equipment.id.toString(),
           memberId: member1.id.toString(),
-          startDate: new Date('2025-01-01T00:00:00Z').toISOString(),
-          endDate: new Date('2025-01-05T00:00:00Z').toISOString(),
+          startDate: new Date('2027-01-01T00:00:00Z').toISOString(),
+          endDate: new Date('2027-01-05T00:00:00Z').toISOString(),
           paymentMethod: { type: 'CREDIT_CARD', token: 'tok_test' },
         });
 
@@ -294,8 +294,8 @@ describe('E2E: Reservation System Flow', () => {
         .send({
           equipmentId: equipment.id.toString(),
           memberId: member2.id.toString(),
-          startDate: new Date('2025-01-01T00:00:00Z').toISOString(),
-          endDate: new Date('2025-01-05T00:00:00Z').toISOString(),
+          startDate: new Date('2027-01-01T00:00:00Z').toISOString(),
+          endDate: new Date('2027-01-05T00:00:00Z').toISOString(),
           paymentMethod: { type: 'CREDIT_CARD', token: 'tok_test' },
         });
 
@@ -316,8 +316,8 @@ describe('E2E: Reservation System Flow', () => {
         .send({
           equipmentId: 'non-existent-equipment',
           memberId: member.id.toString(),
-          startDate: new Date('2025-01-01T00:00:00Z').toISOString(),
-          endDate: new Date('2025-01-05T00:00:00Z').toISOString(),
+          startDate: new Date('2027-01-01T00:00:00Z').toISOString(),
+          endDate: new Date('2027-01-05T00:00:00Z').toISOString(),
           paymentMethod: { type: 'CREDIT_CARD', token: 'tok_test' },
         });
 
@@ -336,8 +336,8 @@ describe('E2E: Reservation System Flow', () => {
         .send({
           equipmentId: equipment.id.toString(),
           memberId: 'non-existent-member',
-          startDate: new Date('2025-01-01T00:00:00Z').toISOString(),
-          endDate: new Date('2025-01-05T00:00:00Z').toISOString(),
+          startDate: new Date('2027-01-01T00:00:00Z').toISOString(),
+          endDate: new Date('2027-01-05T00:00:00Z').toISOString(),
           paymentMethod: { type: 'CREDIT_CARD', token: 'tok_test' },
         });
 
@@ -357,8 +357,8 @@ describe('E2E: Reservation System Flow', () => {
         .send({
           equipmentId: equipment.id.toString(),
           memberId: member.id.toString(),
-          startDate: new Date('2025-01-05T00:00:00Z').toISOString(),
-          endDate: new Date('2025-01-01T00:00:00Z').toISOString(), // End before start
+          startDate: new Date('2027-01-05T00:00:00Z').toISOString(),
+          endDate: new Date('2027-01-01T00:00:00Z').toISOString(), // End before start
           paymentMethod: { type: 'CREDIT_CARD', token: 'tok_test' },
         });
 
@@ -418,7 +418,7 @@ describe('E2E: Reservation System Flow', () => {
           equipmentId: equipment.id.toString(),
           memberId: member1.id.toString(),
           startDate: new Date('2024-12-20T00:00:00Z').toISOString(),
-          endDate: new Date('2025-01-10T00:00:00Z').toISOString(),
+          endDate: new Date('2027-01-10T00:00:00Z').toISOString(),
           paymentMethod: { type: 'CREDIT_CARD', token: 'tok_test' },
         });
 
@@ -432,8 +432,8 @@ describe('E2E: Reservation System Flow', () => {
         .send({
           equipmentId: equipment.id.toString(),
           memberId: member2.id.toString(),
-          startDate: new Date('2025-01-05T00:00:00Z').toISOString(), // During active rental
-          endDate: new Date('2025-01-08T00:00:00Z').toISOString(),
+          startDate: new Date('2027-01-05T00:00:00Z').toISOString(), // During active rental
+          endDate: new Date('2027-01-08T00:00:00Z').toISOString(),
           paymentMethod: { type: 'CREDIT_CARD', token: 'tok_test' },
         });
 
@@ -458,7 +458,7 @@ describe('E2E: Reservation System Flow', () => {
           equipmentId: equipment.id.toString(),
           memberId: member1.id.toString(),
           startDate: new Date('2024-12-20T00:00:00Z').toISOString(),
-          endDate: new Date('2025-01-05T00:00:00Z').toISOString(),
+          endDate: new Date('2027-01-05T00:00:00Z').toISOString(),
           paymentMethod: { type: 'CREDIT_CARD', token: 'tok_test' },
         });
 
@@ -472,8 +472,8 @@ describe('E2E: Reservation System Flow', () => {
         .send({
           equipmentId: equipment.id.toString(),
           memberId: member2.id.toString(),
-          startDate: new Date('2025-01-06T00:00:00Z').toISOString(), // After rental ends
-          endDate: new Date('2025-01-10T00:00:00Z').toISOString(),
+          startDate: new Date('2027-01-06T00:00:00Z').toISOString(), // After rental ends
+          endDate: new Date('2027-01-10T00:00:00Z').toISOString(),
           paymentMethod: { type: 'CREDIT_CARD', token: 'tok_test' },
         });
 
@@ -497,8 +497,8 @@ describe('E2E: Reservation System Flow', () => {
         .send({
           equipmentId: equipment.id.toString(),
           memberId: member.id.toString(),
-          startDate: new Date('2025-01-01T00:00:00Z').toISOString(),
-          endDate: new Date('2025-01-05T00:00:00Z').toISOString(),
+          startDate: new Date('2027-01-01T00:00:00Z').toISOString(),
+          endDate: new Date('2027-01-05T00:00:00Z').toISOString(),
           paymentMethod: { type: 'CREDIT_CARD', token: 'tok_test' },
         });
 
@@ -519,8 +519,8 @@ describe('E2E: Reservation System Flow', () => {
         .send({
           equipmentId: equipment.id.toString(),
           memberId: member.id.toString(),
-          startDate: new Date('2025-01-01T00:00:00Z').toISOString(),
-          endDate: new Date('2025-01-05T00:00:00Z').toISOString(),
+          startDate: new Date('2027-01-01T00:00:00Z').toISOString(),
+          endDate: new Date('2027-01-05T00:00:00Z').toISOString(),
           paymentMethod: { type: 'CREDIT_CARD', token: 'tok_fail' }, // Mock failure token
         });
 

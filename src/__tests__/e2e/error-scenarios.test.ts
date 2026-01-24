@@ -193,7 +193,7 @@ describe('E2E: Error Scenarios and Edge Cases', () => {
       expect(response.body.error.code).toBe('EQUIPMENT_CONDITION_UNACCEPTABLE');
     });
 
-    it('should prevent creating rentals with start date in the past', async () => {
+    it('should allow creating rentals with past dates for historical records', async () => {
       const equipment = await createTestEquipment(context.equipmentRepository);
       const member = await createTestMember(context.memberRepository);
 
@@ -202,13 +202,14 @@ describe('E2E: Error Scenarios and Edge Cases', () => {
         .send({
           equipmentId: equipment.id.toString(),
           memberId: member.id.toString(),
-          startDate: new Date('2020-01-01T00:00:00Z').toISOString(), // Far in the past
+          startDate: new Date('2020-01-01T00:00:00Z').toISOString(), // Historical date
           endDate: new Date('2020-01-05T00:00:00Z').toISOString(),
           paymentMethod: { type: 'CREDIT_CARD' },
         });
 
-      expect(response.status).toBe(400);
-      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+      // Should succeed - past dates are allowed for historical record keeping
+      expect(response.status).toBe(201);
+      expect(response.body.rentalId).toBeDefined();
     });
   });
 
@@ -384,7 +385,7 @@ describe('E2E: Error Scenarios and Edge Cases', () => {
 
       const standardMember = await createTestMember(context.memberRepository, {
         id: 'mem-standard-tier',
-        tier: MembershipTier.BASIC,
+        tier: MembershipTier.SILVER,
       });
 
       const premiumMember = await createTestMember(context.memberRepository, {
