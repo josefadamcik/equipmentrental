@@ -191,7 +191,7 @@ export class ReservationController {
   private async cancelReservation(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { reservationId } = req.params;
-      const body = req.body as CancelReservationRequest;
+      const body = (req.body || {}) as CancelReservationRequest;
 
       // Map notification channel
       const notificationChannel: NotificationChannel | undefined = body.notificationChannel;
@@ -204,10 +204,17 @@ export class ReservationController {
         notificationChannel,
       });
 
+      // Fetch cancelled reservation for status
+      const reservation = await this.reservationRepository.findById(
+        ReservationId.create(reservationId),
+      );
+
       const response: CancelReservationResponse = {
         reservationId: result.reservationId,
+        status: reservation?.status || 'CANCELLED',
         cancelledAt: result.cancelledAt.toISOString(),
-        refundAmount: result.refundAmount,
+        refundAmount: result.refundAmount ?? 0,
+        refundStatus: result.refundTransactionId ? 'SUCCESS' : 'NOT_PROCESSED',
         refundTransactionId: result.refundTransactionId,
       };
 

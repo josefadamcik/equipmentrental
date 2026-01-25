@@ -50,8 +50,10 @@ export interface CancelReservationRequest {
  */
 export interface CancelReservationResponse {
   reservationId: string;
+  status: string;
   cancelledAt: string; // ISO 8601 date string
   refundAmount?: number;
+  refundStatus?: string;
   refundTransactionId?: string;
 }
 
