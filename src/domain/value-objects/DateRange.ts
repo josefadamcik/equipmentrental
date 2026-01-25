@@ -4,7 +4,7 @@ export class DateRange {
     public readonly end: Date,
   ) {
     if (start >= end) {
-      throw new Error('Start date must be before end date');
+      throw new Error('Invalid date range: Start date must be before end date');
     }
   }
 

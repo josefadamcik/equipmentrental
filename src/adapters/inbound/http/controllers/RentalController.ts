@@ -206,6 +206,21 @@ export class RentalController {
         return;
       }
 
+      // Parse return date if provided
+      let returnDate: Date | undefined;
+      if (body.returnDate) {
+        returnDate = new Date(body.returnDate);
+        if (isNaN(returnDate.getTime())) {
+          res.status(400).json({
+            error: {
+              code: 'VALIDATION_ERROR',
+              message: 'Invalid returnDate format. Use ISO 8601 format.',
+            },
+          });
+          return;
+        }
+      }
+
       // Map payment method if provided (currently we just use the type, token handling would be in payment adapter)
       let paymentMethod: PaymentMethod | undefined;
       if (body.paymentMethod) {
@@ -220,6 +235,7 @@ export class RentalController {
         rentalId,
         conditionAtReturn:
           body.conditionAtReturn as import('../../../../domain/types/EquipmentCondition.js').EquipmentCondition,
+        returnDate,
         paymentMethod,
         notificationChannel,
       });

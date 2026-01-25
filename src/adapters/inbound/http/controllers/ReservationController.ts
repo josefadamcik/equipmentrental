@@ -41,7 +41,10 @@ export class ReservationController {
     // GET /api/reservations/:reservationId - Get reservation details
     this.router.get('/:reservationId', this.getReservation.bind(this));
 
-    // PUT /api/reservations/:reservationId/cancel - Cancel a reservation
+    // DELETE /api/reservations/:reservationId - Cancel a reservation (RESTful)
+    this.router.delete('/:reservationId', this.cancelReservation.bind(this));
+
+    // PUT /api/reservations/:reservationId/cancel - Cancel a reservation (alternative)
     this.router.put('/:reservationId/cancel', this.cancelReservation.bind(this));
 
     // PUT /api/reservations/:reservationId/confirm - Confirm a reservation
@@ -100,6 +103,9 @@ export class ReservationController {
       // Map notification channel
       const notificationChannel: NotificationChannel | undefined = body.notificationChannel;
 
+      // If payment method is provided and authorizePayment is not explicitly false, authorize payment
+      const authorizePayment = paymentMethod ? body.authorizePayment !== false : false;
+
       // Create reservation
       const result = await this.reservationService.createReservation({
         equipmentId: body.equipmentId,
@@ -107,7 +113,7 @@ export class ReservationController {
         startDate,
         endDate,
         paymentMethod,
-        authorizePayment: body.authorizePayment,
+        authorizePayment,
         notificationChannel,
       });
 
@@ -130,6 +136,8 @@ export class ReservationController {
         status: reservation.status,
         paymentStatus: result.authorizationId ? 'AUTHORIZED' : 'PENDING',
         authorizationId: result.authorizationId,
+        totalCost: result.totalCost,
+        discountApplied: result.discountApplied,
       };
 
       res.status(201).json(response);

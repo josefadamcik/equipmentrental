@@ -34,6 +34,7 @@ export interface CreateRentalResponse {
  */
 export interface ReturnRentalRequest {
   conditionAtReturn: string;
+  returnDate?: string; // ISO 8601 date string - defaults to current date if not provided
   paymentMethod?: {
     type: string;
     token?: string;

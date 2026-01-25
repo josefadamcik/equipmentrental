@@ -24,6 +24,10 @@ import {
   MemberInactiveError,
   MemberHasOverdueRentalsError,
 } from '../../domain/exceptions/MemberExceptions.js';
+import {
+  RentalNotFoundError,
+  RentalAlreadyReturnedError,
+} from '../../domain/exceptions/RentalExceptions.js';
 import { getMaxConcurrentRentals } from '../../domain/types/MembershipTier.js';
 import { EquipmentCondition, isRentable } from '../../domain/types/EquipmentCondition.js';
 
@@ -242,6 +246,7 @@ export class RentalService {
   async returnRentalWithPayment(params: {
     rentalId: string;
     conditionAtReturn: EquipmentCondition;
+    returnDate?: Date;
     paymentMethod?: PaymentMethod;
     notificationChannel?: NotificationChannel;
   }): Promise<ReturnRentalWithPaymentResult> {
@@ -250,7 +255,12 @@ export class RentalService {
     // Find rental
     const rental = await this.rentalRepository.findById(rentalId);
     if (!rental) {
-      throw new Error(`Rental not found: ${params.rentalId}`);
+      throw new RentalNotFoundError(params.rentalId);
+    }
+
+    // Check if rental is already returned
+    if (rental.status === 'RETURNED') {
+      throw new RentalAlreadyReturnedError(params.rentalId);
     }
 
     // Find equipment
@@ -269,8 +279,9 @@ export class RentalService {
     const damageFee = rental.calculateDamageFee(params.conditionAtReturn);
 
     // Return rental (this calculates late fees internally)
-    const now = new Date();
-    rental.returnRental(params.conditionAtReturn, damageFee, now);
+    // Use provided return date or current date if not specified
+    const returnDate = params.returnDate || new Date();
+    rental.returnRental(params.conditionAtReturn, damageFee, returnDate);
 
     // Update equipment condition and make available
     equipment.markAsReturned(params.conditionAtReturn);
@@ -326,7 +337,7 @@ export class RentalService {
     await this.memberRepository.save(member);
 
     // Publish domain event
-    const event = RentalReturned.create(rental.id, now, lateFee, rental.totalCost);
+    const event = RentalReturned.create(rental.id, returnDate, lateFee, rental.totalCost);
     await this.eventPublisher.publish(event);
 
     // Send return notification
@@ -334,7 +345,7 @@ export class RentalService {
       rental.memberId,
       rental.id,
       equipment.name,
-      now,
+      returnDate,
       rental.totalCost,
       params.notificationChannel,
     );
@@ -433,7 +444,7 @@ export class RentalService {
     // Find rental
     const rental = await this.rentalRepository.findById(rentalId);
     if (!rental) {
-      throw new Error(`Rental not found: ${params.rentalId}`);
+      throw new RentalNotFoundError(params.rentalId);
     }
 
     // Find equipment

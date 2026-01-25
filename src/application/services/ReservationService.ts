@@ -24,6 +24,10 @@ import {
   MemberInactiveError,
   MemberHasOverdueRentalsError,
 } from '../../domain/exceptions/MemberExceptions.js';
+import {
+  ReservationNotFoundError,
+  ReservationAlreadyCancelledError,
+} from '../../domain/exceptions/ReservationExceptions.js';
 import { getMaxConcurrentRentals } from '../../domain/types/MembershipTier.js';
 
 /**
@@ -35,6 +39,8 @@ export interface CreateReservationResult {
   startDate: Date;
   endDate: Date;
   authorizationId?: string;
+  totalCost?: number;
+  discountApplied?: number;
 }
 
 /**
@@ -127,7 +133,8 @@ export class ReservationService {
       period,
     );
     if (conflictingReservations.length > 0) {
-      throw new Error(
+      throw new EquipmentNotAvailableError(
+        params.equipmentId,
         `Equipment is already reserved during the requested period. ${conflictingReservations.length} conflicting reservation(s) found.`,
       );
     }
@@ -138,7 +145,10 @@ export class ReservationService {
       (rental) => rental.status === 'ACTIVE' && rental.period.overlaps(period),
     );
     if (hasConflictingRental) {
-      throw new Error('Equipment is rented during the requested reservation period');
+      throw new EquipmentNotAvailableError(
+        params.equipmentId,
+        'Equipment is rented during the requested reservation period',
+      );
     }
 
     // Create reservation
@@ -148,12 +158,14 @@ export class ReservationService {
       period,
     });
 
+    // Calculate estimated cost and discount
+    const estimatedCost = equipment.calculateRentalCost(period.getDays());
+    const discountedCost = member.applyDiscount(estimatedCost);
+    const discountAmount = estimatedCost.amount - discountedCost.amount;
+
     // Authorize payment if requested
     let authorizationId: string | undefined;
     if (params.authorizePayment && params.paymentMethod) {
-      const estimatedCost = equipment.calculateRentalCost(period.getDays());
-      const discountedCost = member.applyDiscount(estimatedCost);
-
       const authResult = await this.paymentService.authorizePayment(
         memberId,
         discountedCost,
@@ -190,6 +202,8 @@ export class ReservationService {
       startDate: params.startDate,
       endDate: params.endDate,
       authorizationId,
+      totalCost: discountedCost.amount,
+      discountApplied: discountAmount,
     };
   }
 
@@ -207,7 +221,12 @@ export class ReservationService {
     // Find reservation
     const reservation = await this.reservationRepository.findById(reservationId);
     if (!reservation) {
-      throw new Error(`Reservation not found: ${params.reservationId}`);
+      throw new ReservationNotFoundError(params.reservationId);
+    }
+
+    // Check if reservation is already cancelled
+    if (reservation.status === ReservationStatus.CANCELLED) {
+      throw new ReservationAlreadyCancelledError(params.reservationId);
     }
 
     // Find equipment for notification
@@ -277,7 +296,7 @@ export class ReservationService {
     // Find reservation
     const reservation = await this.reservationRepository.findById(reservationId);
     if (!reservation) {
-      throw new Error(`Reservation not found: ${params.reservationId}`);
+      throw new ReservationNotFoundError(params.reservationId);
     }
 
     if (reservation.status !== ReservationStatus.CONFIRMED) {
@@ -500,7 +519,7 @@ export class ReservationService {
     // Find reservation
     const reservation = await this.reservationRepository.findById(reservationId);
     if (!reservation) {
-      throw new Error(`Reservation not found: ${params.reservationId}`);
+      throw new ReservationNotFoundError(params.reservationId);
     }
 
     // Confirm reservation

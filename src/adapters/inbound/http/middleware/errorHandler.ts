@@ -18,10 +18,15 @@ import {
 } from '../../../../domain/exceptions/MemberExceptions.js';
 import {
   RentalNotAllowedError,
+  RentalNotFoundError,
   RentalAlreadyReturnedError,
   InvalidRentalExtensionError,
   OverdueRentalError,
 } from '../../../../domain/exceptions/RentalExceptions.js';
+import {
+  ReservationNotFoundError,
+  ReservationAlreadyCancelledError,
+} from '../../../../domain/exceptions/ReservationExceptions.js';
 import { ErrorResponse } from '../dtos/ErrorDTOs.js';
 
 /**
@@ -29,7 +34,12 @@ import { ErrorResponse } from '../dtos/ErrorDTOs.js';
  */
 function getStatusCodeForException(error: Error): number {
   // Not found errors -> 404
-  if (error instanceof EquipmentNotFoundError || error instanceof MemberNotFoundError) {
+  if (
+    error instanceof EquipmentNotFoundError ||
+    error instanceof MemberNotFoundError ||
+    error instanceof RentalNotFoundError ||
+    error instanceof ReservationNotFoundError
+  ) {
     return 404;
   }
 
@@ -43,7 +53,8 @@ function getStatusCodeForException(error: Error): number {
     error instanceof RentalNotAllowedError ||
     error instanceof RentalAlreadyReturnedError ||
     error instanceof InvalidRentalExtensionError ||
-    error instanceof OverdueRentalError
+    error instanceof OverdueRentalError ||
+    error instanceof ReservationAlreadyCancelledError
   ) {
     return 409;
   }

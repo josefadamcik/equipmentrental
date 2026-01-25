@@ -229,8 +229,14 @@ export class Rental {
     }
 
     const degradationLevels = returnIndex - startIndex;
-    // Charge $50 per degradation level
-    return Money.dollars(50 * degradationLevels);
+
+    // Allow one level of degradation as acceptable wear and tear (e.g., EXCELLENT -> GOOD)
+    if (degradationLevels <= 1) {
+      return Money.zero();
+    }
+
+    // Charge $50 per degradation level beyond acceptable wear
+    return Money.dollars(50 * (degradationLevels - 1));
   }
 
   /**

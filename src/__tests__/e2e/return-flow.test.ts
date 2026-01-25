@@ -64,6 +64,7 @@ describe('E2E: Rental Return Flow with Late Fees', () => {
         .put(`/api/rentals/${rentalId}/return`)
         .send({
           conditionAtReturn: EquipmentCondition.EXCELLENT,
+          returnDate: new Date('2024-01-04T00:00:00Z').toISOString(), // Return before end date
         });
 
       // Assert: Return successful with no late fees
