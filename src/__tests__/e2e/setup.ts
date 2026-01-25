@@ -119,7 +119,7 @@ export async function createTestEquipment(
     name: overrides?.name || 'Test Equipment',
     description: 'Test equipment description',
     category: overrides?.category || 'Power Tools',
-    dailyRate: Money.dollars(overrides?.dailyRate || 50),
+    dailyRate: Money.dollars(overrides?.dailyRate !== undefined ? overrides.dailyRate : 50),
     condition: (overrides?.condition as EquipmentCondition) || EquipmentCondition.EXCELLENT,
     isAvailable: overrides?.isAvailable !== undefined ? overrides.isAvailable : true,
     purchaseDate: new Date(),

@@ -411,14 +411,20 @@ describe('E2E: Reservation System Flow', () => {
         id: 'mem-active-001',
       });
 
-      // Create active rental
+      // Create active rental (use current dates to avoid overdue and valid period for BASIC tier)
+      const now = new Date();
+      const rentalStart = new Date(now);
+      rentalStart.setDate(now.getDate() - 1); // Started yesterday
+      const rentalEnd = new Date(now);
+      rentalEnd.setDate(now.getDate() + 5); // Ends in 5 days (6 day rental within BASIC tier limit)
+
       await request(context.app)
         .post('/api/rentals')
         .send({
           equipmentId: equipment.id.toString(),
           memberId: member1.id.toString(),
-          startDate: new Date('2024-12-20T00:00:00Z').toISOString(),
-          endDate: new Date('2027-01-10T00:00:00Z').toISOString(),
+          startDate: rentalStart.toISOString(),
+          endDate: rentalEnd.toISOString(),
           paymentMethod: { type: 'CREDIT_CARD', token: 'tok_test' },
         });
 
@@ -427,13 +433,18 @@ describe('E2E: Reservation System Flow', () => {
         id: 'mem-reserve-conflict-001',
       });
 
+      const reservationStart = new Date(now);
+      reservationStart.setDate(now.getDate() + 2); // Starts in 2 days (overlaps with active rental)
+      const reservationEnd = new Date(now);
+      reservationEnd.setDate(now.getDate() + 4); // Ends in 4 days
+
       const response = await request(context.app)
         .post('/api/reservations')
         .send({
           equipmentId: equipment.id.toString(),
           memberId: member2.id.toString(),
-          startDate: new Date('2027-01-05T00:00:00Z').toISOString(), // During active rental
-          endDate: new Date('2027-01-08T00:00:00Z').toISOString(),
+          startDate: reservationStart.toISOString(), // During active rental
+          endDate: reservationEnd.toISOString(),
           paymentMethod: { type: 'CREDIT_CARD', token: 'tok_test' },
         });
 

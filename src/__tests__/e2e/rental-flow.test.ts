@@ -351,13 +351,25 @@ describe('E2E: Rental Creation and Management Flow', () => {
         id: 'eq-multi-002',
       });
 
+      // Use current dates to avoid overdue status blocking second rental
+      const now = new Date();
+      const rental1Start = new Date(now);
+      rental1Start.setDate(now.getDate() - 2); // Started 2 days ago
+      const rental1End = new Date(now);
+      rental1End.setDate(now.getDate() + 3); // Ends in 3 days
+
+      const rental2Start = new Date(now);
+      rental2Start.setDate(now.getDate() + 10); // Starts in 10 days
+      const rental2End = new Date(now);
+      rental2End.setDate(now.getDate() + 15); // Ends in 15 days
+
       await request(context.app)
         .post('/api/rentals')
         .send({
           equipmentId: equipment1.id.toString(),
           memberId: member.id.toString(),
-          startDate: new Date('2024-01-01T00:00:00Z').toISOString(),
-          endDate: new Date('2024-01-05T00:00:00Z').toISOString(),
+          startDate: rental1Start.toISOString(),
+          endDate: rental1End.toISOString(),
           paymentMethod: { type: 'CREDIT_CARD', token: 'tok_test' },
         });
 
@@ -366,8 +378,8 @@ describe('E2E: Rental Creation and Management Flow', () => {
         .send({
           equipmentId: equipment2.id.toString(),
           memberId: member.id.toString(),
-          startDate: new Date('2024-01-10T00:00:00Z').toISOString(),
-          endDate: new Date('2024-01-15T00:00:00Z').toISOString(),
+          startDate: rental2Start.toISOString(),
+          endDate: rental2End.toISOString(),
           paymentMethod: { type: 'CREDIT_CARD', token: 'tok_test' },
         });
 

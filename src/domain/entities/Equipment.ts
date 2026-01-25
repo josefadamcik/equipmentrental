@@ -30,8 +30,8 @@ export class Equipment {
       throw new Error('Equipment category cannot be empty');
     }
 
-    if (props.dailyRate.amount <= 0) {
-      throw new Error('Daily rate must be greater than zero');
+    if (props.dailyRate.amount < 0) {
+      throw new Error('Daily rate cannot be negative');
     }
 
     return new Equipment({

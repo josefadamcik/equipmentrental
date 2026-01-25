@@ -267,15 +267,25 @@ describe('E2E: Error Scenarios and Edge Cases', () => {
         id: 'mem-res-concurrent-002',
       });
 
-      // Act: Send concurrent reservation requests
+      // Act: Send concurrent reservation requests (use future dates)
+      const futureDate1 = new Date();
+      futureDate1.setDate(futureDate1.getDate() + 30); // 30 days from now
+      const futureDate2 = new Date(futureDate1);
+      futureDate2.setDate(futureDate1.getDate() + 4); // 4 days after start
+
+      const futureDate3 = new Date(futureDate1);
+      futureDate3.setDate(futureDate1.getDate() + 2); // 2 days after first start (overlaps)
+      const futureDate4 = new Date(futureDate1);
+      futureDate4.setDate(futureDate1.getDate() + 6); // 6 days after first start
+
       const [response1, response2] = await Promise.all([
         request(context.app)
           .post('/api/reservations')
           .send({
             equipmentId: equipment.id.toString(),
             memberId: member1.id.toString(),
-            startDate: new Date('2025-01-01T00:00:00Z').toISOString(),
-            endDate: new Date('2025-01-05T00:00:00Z').toISOString(),
+            startDate: futureDate1.toISOString(),
+            endDate: futureDate2.toISOString(),
             paymentMethod: { type: 'CREDIT_CARD' },
           }),
         request(context.app)
@@ -283,8 +293,8 @@ describe('E2E: Error Scenarios and Edge Cases', () => {
           .send({
             equipmentId: equipment.id.toString(),
             memberId: member2.id.toString(),
-            startDate: new Date('2025-01-03T00:00:00Z').toISOString(),
-            endDate: new Date('2025-01-07T00:00:00Z').toISOString(),
+            startDate: futureDate3.toISOString(),
+            endDate: futureDate4.toISOString(),
             paymentMethod: { type: 'CREDIT_CARD' },
           }),
       ]);
@@ -320,15 +330,25 @@ describe('E2E: Error Scenarios and Edge Cases', () => {
       const equipment = await createTestEquipment(context.equipmentRepository, {
         dailyRate: 50,
       });
-      const member = await createTestMember(context.memberRepository);
+      // Use PLATINUM tier for 31-day rental (PLATINUM allows up to 60 days)
+      const member = await createTestMember(context.memberRepository, {
+        tier: MembershipTier.PLATINUM,
+      });
+
+      // Use current/future dates
+      const now = new Date();
+      const startDate = new Date(now);
+      startDate.setDate(now.getDate() + 1); // Start tomorrow
+      const endDate = new Date(startDate);
+      endDate.setDate(startDate.getDate() + 31); // 31 days
 
       const response = await request(context.app)
         .post('/api/rentals')
         .send({
           equipmentId: equipment.id.toString(),
           memberId: member.id.toString(),
-          startDate: new Date('2024-01-01T00:00:00Z').toISOString(),
-          endDate: new Date('2024-02-01T00:00:00Z').toISOString(), // 31 days
+          startDate: startDate.toISOString(),
+          endDate: endDate.toISOString(), // 31 days
           paymentMethod: { type: 'CREDIT_CARD' },
         });
 
@@ -342,13 +362,20 @@ describe('E2E: Error Scenarios and Edge Cases', () => {
       });
       const member = await createTestMember(context.memberRepository);
 
+      // Use current/future dates
+      const now = new Date();
+      const startDate = new Date(now);
+      startDate.setDate(now.getDate() + 1); // Start tomorrow
+      const endDate = new Date(startDate);
+      endDate.setDate(startDate.getDate() + 4); // 4 days
+
       const response = await request(context.app)
         .post('/api/rentals')
         .send({
           equipmentId: equipment.id.toString(),
           memberId: member.id.toString(),
-          startDate: new Date('2024-01-01T00:00:00Z').toISOString(),
-          endDate: new Date('2024-01-05T00:00:00Z').toISOString(),
+          startDate: startDate.toISOString(),
+          endDate: endDate.toISOString(),
           paymentMethod: { type: 'CREDIT_CARD' },
         });
 
@@ -454,21 +481,33 @@ describe('E2E: Error Scenarios and Edge Cases', () => {
         EquipmentCondition.FAIR,
       ];
 
-      const member = await createTestMember(context.memberRepository);
+      // Use different members for each rental to avoid overdue rental blocking
+      let memberIndex = 0;
 
       for (const condition of conditions) {
+        const member = await createTestMember(context.memberRepository, {
+          id: `mem-condition-test-${memberIndex++}`,
+        });
+
         const equipment = await createTestEquipment(context.equipmentRepository, {
           id: `eq-condition-${condition}`,
           condition,
         });
+
+        // Use current/future dates
+        const now = new Date();
+        const startDate = new Date(now);
+        startDate.setDate(now.getDate() + memberIndex); // Stagger start dates
+        const endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + 4); // 4 days
 
         const response = await request(context.app)
           .post('/api/rentals')
           .send({
             equipmentId: equipment.id.toString(),
             memberId: member.id.toString(),
-            startDate: new Date('2024-01-01T00:00:00Z').toISOString(),
-            endDate: new Date('2024-01-05T00:00:00Z').toISOString(),
+            startDate: startDate.toISOString(),
+            endDate: endDate.toISOString(),
             paymentMethod: { type: 'CREDIT_CARD' },
           });
 

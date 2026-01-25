@@ -33,8 +33,8 @@ export class Rental {
     baseCost: Money;
     conditionAtStart: EquipmentCondition;
   }): Rental {
-    if (props.baseCost.amount <= 0) {
-      throw new Error('Rental base cost must be greater than zero');
+    if (props.baseCost.amount < 0) {
+      throw new Error('Rental base cost cannot be negative');
     }
 
     return new Rental({

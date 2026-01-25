@@ -75,6 +75,11 @@ function getStatusCodeForException(error: Error): number {
     return 400;
   }
 
+  // Validation errors -> 400 Bad Request
+  if (error.message.includes('validation') || error.message.includes('Invalid')) {
+    return 400;
+  }
+
   // Default to 500 Internal Server Error
   return 500;
 }
@@ -93,7 +98,8 @@ function getErrorCode(error: Error): string {
   }
 
   // For validation errors
-  if (error.message.includes('validation') || error.message.includes('invalid')) {
+  const errorMessageLower = error.message.toLowerCase();
+  if (errorMessageLower.includes('validation') || errorMessageLower.includes('invalid')) {
     return 'VALIDATION_ERROR';
   }
 
