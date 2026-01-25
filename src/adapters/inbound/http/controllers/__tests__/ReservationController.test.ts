@@ -46,9 +46,21 @@ describe('ReservationController', () => {
         equipmentName: 'Drill',
         startDate: new Date('2024-01-01'),
         endDate: new Date('2024-01-05'),
+        totalCost: 100,
+        discountApplied: 0,
       };
 
+      const mockReservation = Reservation.reconstitute({
+        id: ReservationId.create('res-123'),
+        equipmentId: EquipmentId.create('eq-123'),
+        memberId: MemberId.create('mem-123'),
+        period: DateRange.create(new Date('2024-01-01'), new Date('2024-01-05')),
+        status: 'PENDING',
+        createdAt: new Date(),
+      });
+
       reservationService.createReservation.mockResolvedValue(mockResult);
+      reservationRepository.findById.mockResolvedValue(mockReservation);
 
       const response = await request(app).post('/api/reservations').send({
         equipmentId: 'eq-123',
@@ -69,9 +81,21 @@ describe('ReservationController', () => {
         startDate: new Date('2024-01-01'),
         endDate: new Date('2024-01-05'),
         authorizationId: 'auth-123',
+        totalCost: 100,
+        discountApplied: 0,
       };
 
+      const mockReservation = Reservation.reconstitute({
+        id: ReservationId.create('res-123'),
+        equipmentId: EquipmentId.create('eq-123'),
+        memberId: MemberId.create('mem-123'),
+        period: DateRange.create(new Date('2024-01-01'), new Date('2024-01-05')),
+        status: 'CONFIRMED',
+        createdAt: new Date(),
+      });
+
       reservationService.createReservation.mockResolvedValue(mockResult);
+      reservationRepository.findById.mockResolvedValue(mockReservation);
 
       const response = await request(app)
         .post('/api/reservations')

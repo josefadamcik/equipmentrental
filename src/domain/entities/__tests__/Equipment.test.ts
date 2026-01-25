@@ -48,17 +48,17 @@ describe('Equipment Entity', () => {
       ).toThrow('Equipment category cannot be empty');
     });
 
-    it('should throw error if daily rate is zero', () => {
-      expect(() =>
-        Equipment.create({
-          name: 'Power Drill',
-          description: 'Description',
-          category: 'Tools',
-          dailyRate: Money.zero(),
-          condition: EquipmentCondition.EXCELLENT,
-          purchaseDate: new Date(),
-        }),
-      ).toThrow('Daily rate must be greater than zero');
+    it('should allow zero daily rate for promotional equipment', () => {
+      const equipment = Equipment.create({
+        name: 'Power Drill',
+        description: 'Description',
+        category: 'Tools',
+        dailyRate: Money.zero(),
+        condition: EquipmentCondition.EXCELLENT,
+        purchaseDate: new Date(),
+      });
+
+      expect(equipment.dailyRate.equals(Money.zero())).toBe(true);
     });
 
     it('should mark equipment as unavailable if condition is not rentable', () => {
@@ -247,7 +247,7 @@ describe('Equipment Entity', () => {
       expect(equipment.dailyRate.equals(Money.dollars(30))).toBe(true);
     });
 
-    it('should throw error if new rate is zero or negative', () => {
+    it('should allow zero rate for promotional equipment', () => {
       const equipment = Equipment.create({
         name: 'Power Drill',
         description: 'Description',
@@ -257,8 +257,22 @@ describe('Equipment Entity', () => {
         purchaseDate: new Date(),
       });
 
-      expect(() => equipment.updateDailyRate(Money.zero())).toThrow(
-        'Daily rate must be greater than zero',
+      equipment.updateDailyRate(Money.zero());
+      expect(equipment.dailyRate.equals(Money.zero())).toBe(true);
+    });
+
+    it('should throw error if new rate is negative', () => {
+      const equipment = Equipment.create({
+        name: 'Power Drill',
+        description: 'Description',
+        category: 'Tools',
+        dailyRate: Money.dollars(25),
+        condition: EquipmentCondition.EXCELLENT,
+        purchaseDate: new Date(),
+      });
+
+      expect(() => equipment.updateDailyRate(Money.dollars(-10))).toThrow(
+        'Money amount cannot be negative',
       );
     });
   });

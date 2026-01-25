@@ -138,8 +138,8 @@ export class Equipment {
    * Update daily rental rate
    */
   updateDailyRate(newRate: Money): void {
-    if (newRate.amount <= 0) {
-      throw new Error('Daily rate must be greater than zero');
+    if (newRate.amount < 0) {
+      throw new Error('Daily rate cannot be negative');
     }
     this.props.dailyRate = newRate;
   }

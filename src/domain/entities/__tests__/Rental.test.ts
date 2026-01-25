@@ -29,19 +29,20 @@ describe('Rental Entity', () => {
       expect(rental.conditionAtStart).toBe(EquipmentCondition.EXCELLENT);
     });
 
-    it('should throw error if base cost is zero', () => {
+    it('should allow zero base cost for promotional rentals', () => {
       const start = new Date('2024-06-01');
       const end = new Date('2024-06-08');
 
-      expect(() =>
-        Rental.create({
-          equipmentId: EquipmentId.generate(),
-          memberId: MemberId.generate(),
-          period: DateRange.create(start, end),
-          baseCost: Money.zero(),
-          conditionAtStart: EquipmentCondition.EXCELLENT,
-        }),
-      ).toThrow('Rental base cost must be greater than zero');
+      const rental = Rental.create({
+        equipmentId: EquipmentId.generate(),
+        memberId: MemberId.generate(),
+        period: DateRange.create(start, end),
+        baseCost: Money.zero(),
+        conditionAtStart: EquipmentCondition.EXCELLENT,
+      });
+
+      expect(rental.baseCost.equals(Money.zero())).toBe(true);
+      expect(rental.totalCost.equals(Money.zero())).toBe(true);
     });
   });
 
@@ -259,25 +260,25 @@ describe('Rental Entity', () => {
       expect(fee.equals(Money.zero())).toBe(true);
     });
 
-    it('should calculate fee for one level degradation', () => {
+    it('should not charge fee for one level degradation (acceptable wear)', () => {
       const rental = createRental();
 
       const fee = rental.calculateDamageFee(EquipmentCondition.GOOD);
-      expect(fee.equals(Money.dollars(50))).toBe(true);
+      expect(fee.equals(Money.zero())).toBe(true);
     });
 
     it('should calculate fee for two level degradation', () => {
       const rental = createRental();
 
       const fee = rental.calculateDamageFee(EquipmentCondition.FAIR);
-      expect(fee.equals(Money.dollars(100))).toBe(true);
+      expect(fee.equals(Money.dollars(50))).toBe(true);
     });
 
     it('should calculate fee for severe degradation', () => {
       const rental = createRental();
 
       const fee = rental.calculateDamageFee(EquipmentCondition.DAMAGED);
-      expect(fee.equals(Money.dollars(200))).toBe(true);
+      expect(fee.equals(Money.dollars(150))).toBe(true); // 3 levels - 1 = 2, 2 * $50 = $150
     });
   });
 

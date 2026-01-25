@@ -374,7 +374,7 @@ describe('ReturnRentalCommandHandler', () => {
 
       // Assert
       expect(result.conditionChanged).toBe(true);
-      expect(result.damageFees).toBe(100); // 2 levels * $50/level
+      expect(result.damageFees).toBe(50); // 2 levels degradation - 1 acceptable level = 1 * $50/level
     });
   });
 
