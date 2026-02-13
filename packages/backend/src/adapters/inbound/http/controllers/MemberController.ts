@@ -45,7 +45,7 @@ export class MemberController {
    */
   private async getMember(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { memberId } = req.params;
+      const memberId = req.params['memberId'] as string;
 
       const member = await this.memberRepository.findById(MemberId.create(memberId));
 
@@ -81,7 +81,7 @@ export class MemberController {
    */
   private async getMemberRentals(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { memberId } = req.params;
+      const memberId = req.params['memberId'] as string;
 
       const results = await this.getMemberRentalsQueryHandler.execute({ memberId });
 

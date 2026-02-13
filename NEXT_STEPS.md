@@ -701,6 +701,220 @@ Replace the in-memory `Map<string, Stripe.PaymentIntent>` in `StripePaymentServi
 - ✅ DI container wires the correct implementation based on config
 - ✅ All existing payment tests pass (1156 tests total)
 
+## Phase 8: Monorepo Migration & React Frontend
+
+### 8.1 Monorepo Scaffolding ✅ COMPLETED
+Migrate the existing single-package project to an npm workspaces monorepo with `packages/backend` and `packages/frontend`.
+
+**Changes:**
+- Create `packages/backend/` and `packages/frontend/` directories
+- Move all backend source files (`src/`, `prisma/`, `jest.config.ts`, `tsconfig.json`, `eslint.config.mjs`, `.prettierrc`, `prisma.config.ts`) into `packages/backend/`
+- Move backend `Dockerfile`, `.dockerignore`, `.env.example`, `.env.docker`, `.env.production.example` into `packages/backend/`
+- Create root `package.json` with `"workspaces": ["packages/*"]` and shared scripts
+- Create root `tsconfig.base.json` with shared compiler options (strict, ES2022, ESNext modules)
+- Update `packages/backend/package.json`: name to `@equipmentrental/backend`, adjust script paths
+- Update `packages/backend/tsconfig.json` to extend `../../tsconfig.base.json`
+- Update all relative config references broken by the move (jest config, eslint config, prisma paths)
+- Update `.github/workflows/ci.yml` to use workspace commands
+- Move `docker-compose.yml` and `docker-compose.prod.yml` to root, update build contexts to `packages/backend/`
+
+**Acceptance criteria:**
+- ✅ `npm install` from root installs all workspace dependencies
+- ✅ `npm test -w @equipmentrental/backend` runs all 1156 backend tests successfully
+- ✅ `npm run build -w @equipmentrental/backend` compiles without errors
+- ✅ `npm run lint -w @equipmentrental/backend` passes
+- ✅ Docker compose still works with updated build context
+
+**Test Coverage**: 1156 tests passing (all existing tests still green)
+
+### 8.2 Frontend Project Setup
+Scaffold a new React + TypeScript frontend using Vite in `packages/frontend/`.
+
+**Files to create:**
+- `packages/frontend/package.json` - named `@equipmentrental/frontend` with Vite, React, TypeScript deps
+- `packages/frontend/tsconfig.json` - extends root base, adds React JSX settings
+- `packages/frontend/tsconfig.node.json` - for Vite config
+- `packages/frontend/vite.config.ts` - with API proxy to `http://localhost:3000` for dev
+- `packages/frontend/index.html` - Vite entry HTML
+- `packages/frontend/src/main.tsx` - React entry point
+- `packages/frontend/src/App.tsx` - Root app component with placeholder
+- `packages/frontend/src/vite-env.d.ts` - Vite type declarations
+- `packages/frontend/eslint.config.mjs` - ESLint config matching backend style + React rules
+- `packages/frontend/.prettierrc` - symlink or copy of backend config
+
+**Dependencies:** react, react-dom, typescript, vite, @vitejs/plugin-react, tailwindcss, @tailwindcss/vite
+
+**Acceptance criteria:**
+- `npm run dev -w @equipmentrental/frontend` starts Vite dev server on port 5173
+- `npm run build -w @equipmentrental/frontend` produces production build
+- API proxy forwards `/api/*` requests to backend at localhost:3000
+- Tailwind CSS is working (utility classes render correctly)
+
+### 8.3 Frontend Docker & Compose Integration
+Create a Docker setup for the frontend and integrate with existing compose files.
+
+**Files to create:**
+- `packages/frontend/Dockerfile` - multi-stage build: node (build) → nginx (serve)
+- `packages/frontend/nginx.conf` - nginx config with SPA fallback and `/api` proxy
+
+**Files to modify:**
+- `docker-compose.yml` - add `frontend` service (port 5173 dev with Vite, volume mounts)
+- `docker-compose.prod.yml` - add `frontend` service (port 80, nginx serving static files, API proxy to backend)
+
+**Acceptance criteria:**
+- `docker compose up` starts both backend and frontend
+- Frontend dev server accessible at localhost:5173
+- API requests from frontend proxy to backend correctly
+- Production build serves static files via nginx
+
+### 8.4 API Client & Shared Types
+Create typed API client and TypeScript interfaces matching backend DTOs.
+
+**Files to create:**
+- `packages/frontend/src/types/api.ts` - TypeScript interfaces for all API entities (Equipment, Member, Rental, Reservation, error responses)
+- `packages/frontend/src/api/client.ts` - Typed fetch wrapper with base URL config, error handling, and methods for all backend endpoints
+- `packages/frontend/src/api/equipment.ts` - Equipment API functions (list, get, create, update)
+- `packages/frontend/src/api/members.ts` - Member API functions (list, get, create, update)
+- `packages/frontend/src/api/rentals.ts` - Rental API functions (create, get, return, extend, list by member)
+- `packages/frontend/src/api/reservations.ts` - Reservation API functions (create, get, confirm, cancel, fulfill)
+- `packages/frontend/src/hooks/useApi.ts` - Generic React hook for data fetching with loading/error states
+
+**Acceptance criteria:**
+- All API types match backend DTO interfaces
+- API client handles base URL from environment variable (`VITE_API_URL`)
+- Error responses are typed and handled consistently
+- `useApi` hook provides loading, error, and data states
+
+### 8.5 App Shell, Routing & Layout
+Set up the core application structure with navigation and routing.
+
+**Dependencies:** react-router-dom
+
+**Files to create:**
+- `packages/frontend/src/App.tsx` - Replace placeholder with router setup
+- `packages/frontend/src/layouts/AppLayout.tsx` - Main layout with sidebar nav + header + content area
+- `packages/frontend/src/components/Sidebar.tsx` - Navigation sidebar with links to all sections
+- `packages/frontend/src/components/Header.tsx` - Top header bar
+- `packages/frontend/src/pages/DashboardPage.tsx` - Placeholder dashboard
+- `packages/frontend/src/pages/EquipmentListPage.tsx` - Placeholder
+- `packages/frontend/src/pages/MembersListPage.tsx` - Placeholder
+- `packages/frontend/src/pages/RentalsPage.tsx` - Placeholder
+- `packages/frontend/src/pages/ReservationsPage.tsx` - Placeholder
+- `packages/frontend/src/router.tsx` - Route definitions
+
+**Acceptance criteria:**
+- Sidebar navigation renders with links: Dashboard, Equipment, Members, Rentals, Reservations
+- Routes navigate to correct placeholder pages
+- Layout is responsive (sidebar collapses on mobile)
+- Active route is highlighted in sidebar
+
+### 8.6 Equipment Management Pages
+Build full CRUD UI for equipment.
+
+**Files to create:**
+- `packages/frontend/src/pages/EquipmentListPage.tsx` - Table with search, filter by category/condition/availability, pagination
+- `packages/frontend/src/pages/EquipmentDetailPage.tsx` - Equipment details, current status, rental history
+- `packages/frontend/src/pages/EquipmentFormPage.tsx` - Create/edit equipment form with validation
+- `packages/frontend/src/components/equipment/EquipmentTable.tsx` - Reusable table component
+- `packages/frontend/src/components/equipment/EquipmentStatusBadge.tsx` - Condition/availability badges
+- `packages/frontend/src/components/equipment/EquipmentFilters.tsx` - Filter controls
+
+**API endpoints used:** `GET /api/equipment/available`, `GET /api/equipment/:id`, `POST /api/equipment`, `PUT /api/equipment/:id`
+
+**Acceptance criteria:**
+- Equipment list loads from API with loading/error states
+- Search and filters work (category, condition, availability)
+- Create form validates inputs and submits to API
+- Detail page shows equipment info and current rental status
+
+### 8.7 Member Management Pages
+Build full CRUD UI for members.
+
+**Files to create:**
+- `packages/frontend/src/pages/MembersListPage.tsx` - Table with search, filter by tier/status
+- `packages/frontend/src/pages/MemberDetailPage.tsx` - Profile, active rentals, rental history
+- `packages/frontend/src/pages/MemberFormPage.tsx` - Create/edit member form
+- `packages/frontend/src/components/members/MemberTable.tsx` - Reusable table component
+- `packages/frontend/src/components/members/TierBadge.tsx` - Membership tier indicator
+
+**API endpoints used:** `GET /api/members`, `GET /api/members/:id`, `POST /api/members`, `PUT /api/members/:id`, `GET /api/rentals/member/:id`
+
+**Acceptance criteria:**
+- Member list loads from API with search and tier filtering
+- Member detail shows profile and associated rentals
+- Create/edit form validates and submits correctly
+- Tier badge shows correct color/label per tier level
+
+### 8.8 Rental Workflow Pages
+Build the complete rental lifecycle UI.
+
+**Files to create:**
+- `packages/frontend/src/pages/RentalsPage.tsx` - Active rentals list with status indicators
+- `packages/frontend/src/pages/CreateRentalPage.tsx` - Multi-step rental form (select equipment → member → dates → payment → confirm)
+- `packages/frontend/src/pages/RentalDetailPage.tsx` - Rental details with available actions (return, extend)
+- `packages/frontend/src/components/rentals/RentalTable.tsx` - Rentals table component
+- `packages/frontend/src/components/rentals/RentalStatusBadge.tsx` - Status indicators
+- `packages/frontend/src/components/rentals/ReturnRentalDialog.tsx` - Return flow with condition assessment
+- `packages/frontend/src/components/rentals/ExtendRentalDialog.tsx` - Extension flow
+
+**API endpoints used:** `POST /api/rentals`, `GET /api/rentals/:id`, `PUT /api/rentals/:id/return`, `PUT /api/rentals/:id/extend`, `GET /api/rentals/member/:memberId`
+
+**Acceptance criteria:**
+- Rental creation form guides user through equipment/member/date selection
+- Active rentals list shows all current rentals with status
+- Return flow shows condition selector and fee preview before confirming
+- Extend flow shows additional cost and new end date before confirming
+
+### 8.9 Reservation Management Pages
+Build reservation lifecycle UI.
+
+**Files to create:**
+- `packages/frontend/src/pages/ReservationsPage.tsx` - Reservation list with status filters
+- `packages/frontend/src/pages/CreateReservationPage.tsx` - Reservation form
+- `packages/frontend/src/pages/ReservationDetailPage.tsx` - Details with actions (confirm, cancel, fulfill)
+- `packages/frontend/src/components/reservations/ReservationTable.tsx`
+- `packages/frontend/src/components/reservations/ReservationStatusBadge.tsx`
+
+**API endpoints used:** `POST /api/reservations`, `GET /api/reservations/:id`, `PUT /api/reservations/:id/confirm`, `DELETE /api/reservations/:id`, `PUT /api/reservations/:id/fulfill`
+
+**Acceptance criteria:**
+- Reservation list with status filtering (pending, confirmed, cancelled, fulfilled)
+- Create form with equipment selection and date range picker
+- Action buttons for confirm/cancel/fulfill with confirmation dialogs
+
+### 8.10 Dashboard Page
+Build a summary dashboard with key metrics.
+
+**Files to create:**
+- `packages/frontend/src/pages/DashboardPage.tsx` - Full dashboard layout
+- `packages/frontend/src/components/dashboard/StatCard.tsx` - Metric card component
+- `packages/frontend/src/components/dashboard/RecentActivityList.tsx` - Recent rental/reservation activity
+- `packages/frontend/src/components/dashboard/EquipmentAvailabilityChart.tsx` - Visual availability overview
+
+**API endpoints used:** `GET /api/equipment/available`, `GET /api/rentals` (overdue), various list endpoints for counts
+
+**Acceptance criteria:**
+- Summary cards: active rentals count, available equipment count, overdue rentals, total members
+- Recent activity feed showing latest rentals and reservations
+- Equipment availability overview
+
+### 8.11 CI/CD & Vercel Configuration
+Update CI pipeline for monorepo and add Vercel deployment config.
+
+**Files to modify:**
+- `.github/workflows/ci.yml` - Add frontend lint, typecheck, build jobs alongside backend jobs
+- `.github/workflows/docker.yml` - Build separate backend and frontend Docker images
+
+**Files to create:**
+- `packages/frontend/vercel.json` - Vercel build config with API rewrites to backend URL
+- Root `turbo.json` or npm workspace scripts for running all workspace tasks
+
+**Acceptance criteria:**
+- CI runs both backend and frontend lint/typecheck/build
+- Docker workflow builds both images with separate tags
+- Vercel config correctly rewrites `/api/*` to backend service URL
+- `npm run build` from root builds both workspaces
+
 ## Recommended Implementation Order
 
 1. **Start with Value Objects** - They have no dependencies

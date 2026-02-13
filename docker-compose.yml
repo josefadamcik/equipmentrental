@@ -15,7 +15,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./prisma/migrations:/docker-entrypoint-initdb.d/migrations:ro
+      - ./packages/backend/prisma/migrations:/docker-entrypoint-initdb.d/migrations:ro
     networks:
       - equipmentrental-network
     healthcheck:
@@ -27,7 +27,7 @@ services:
   # Application (Development)
   app:
     build:
-      context: .
+      context: ./packages/backend
       dockerfile: Dockerfile
       target: development
     container_name: equipmentrental-app
@@ -52,10 +52,10 @@ services:
       - "3000:3000"
     volumes:
       # Mount source code for hot reload
-      - ./src:/app/src:ro
-      - ./prisma:/app/prisma:ro
-      - ./package.json:/app/package.json:ro
-      - ./tsconfig.json:/app/tsconfig.json:ro
+      - ./packages/backend/src:/app/src:ro
+      - ./packages/backend/prisma:/app/prisma:ro
+      - ./packages/backend/package.json:/app/package.json:ro
+      - ./packages/backend/tsconfig.json:/app/tsconfig.json:ro
       # Prevent node_modules from being overwritten
       - /app/node_modules
     networks:

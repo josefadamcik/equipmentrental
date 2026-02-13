@@ -13,7 +13,7 @@ services:
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./prisma/migrations:/docker-entrypoint-initdb.d/migrations:ro
+      - ./packages/backend/prisma/migrations:/docker-entrypoint-initdb.d/migrations:ro
     networks:
       - equipmentrental-network
     healthcheck:
@@ -29,7 +29,7 @@ services:
   # Application (Production)
   app:
     build:
-      context: .
+      context: ./packages/backend
       dockerfile: Dockerfile
       target: production
     container_name: equipmentrental-app-prod

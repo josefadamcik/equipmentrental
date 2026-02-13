@@ -121,7 +121,7 @@ export class RentalController {
    */
   private async getRental(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { rentalId } = req.params;
+      const rentalId = req.params['rentalId'] as string;
 
       const result = await this.getRentalQueryHandler.execute({ rentalId });
 
@@ -161,7 +161,7 @@ export class RentalController {
    */
   private async returnRental(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { rentalId } = req.params;
+      const rentalId = req.params['rentalId'] as string;
       // req.body has already been validated by validateBody(returnRentalSchema)
       const body = req.body as import('../validation/schemas.js').ReturnRentalInput;
 
@@ -213,7 +213,7 @@ export class RentalController {
    */
   private async extendRental(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { rentalId } = req.params;
+      const rentalId = req.params['rentalId'] as string;
       // req.body has already been validated by validateBody(extendRentalSchema)
       const body = req.body as import('../validation/schemas.js').ExtendRentalInput;
 
@@ -265,7 +265,7 @@ export class RentalController {
    */
   private async getMemberRentals(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { memberId } = req.params;
+      const memberId = req.params['memberId'] as string;
 
       const results = await this.getMemberRentalsQueryHandler.execute({ memberId });
 

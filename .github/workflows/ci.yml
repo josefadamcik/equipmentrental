@@ -24,10 +24,10 @@ jobs:
         run: npm ci
 
       - name: Run ESLint
-        run: npm run lint
+        run: npm run lint -w @equipmentrental/backend
 
       - name: Check code formatting
-        run: npm run format:check
+        run: npm run format:check -w @equipmentrental/backend
 
   typecheck:
     name: Type Check
@@ -47,9 +47,10 @@ jobs:
 
       - name: Generate Prisma Client
         run: npx prisma generate
+        working-directory: packages/backend
 
       - name: Run TypeScript compiler
-        run: npm run typecheck
+        run: npm run typecheck -w @equipmentrental/backend
 
   test:
     name: Test
@@ -72,16 +73,17 @@ jobs:
 
       - name: Generate Prisma Client
         run: npx prisma generate
+        working-directory: packages/backend
 
       - name: Run tests
-        run: npm run test:coverage
+        run: npm run test:coverage -w @equipmentrental/backend
 
       - name: Upload coverage to Codecov
         if: matrix.node-version == 20
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage/lcov.info
+          files: ./packages/backend/coverage/lcov.info
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: false
@@ -105,15 +107,16 @@ jobs:
 
       - name: Generate Prisma Client
         run: npx prisma generate
+        working-directory: packages/backend
 
       - name: Build project
-        run: npm run build
+        run: npm run build -w @equipmentrental/backend
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: dist
-          path: dist/
+          path: packages/backend/dist/
           retention-days: 7
 
   integration:
@@ -136,20 +139,22 @@ jobs:
 
       - name: Generate Prisma Client
         run: npx prisma generate
+        working-directory: packages/backend
 
       - name: Run database migrations
         env:
           DATABASE_URL: file:./equipmentrental_test.db
         run: npx prisma migrate deploy
+        working-directory: packages/backend
 
       - name: Run integration tests
         env:
           NODE_ENV: test
           DATABASE_URL: file:./equipmentrental_test.db
-        run: npm test -- --testPathPatterns=integration
+        run: npm run test -w @equipmentrental/backend -- --testPathPatterns=integration
 
       - name: Run E2E tests
         env:
           NODE_ENV: test
           DATABASE_URL: file:./equipmentrental_test.db
-        run: npm test -- --testPathPatterns=e2e
+        run: npm run test -w @equipmentrental/backend -- --testPathPatterns=e2e

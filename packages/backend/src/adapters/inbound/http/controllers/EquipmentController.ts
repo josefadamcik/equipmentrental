@@ -72,7 +72,7 @@ export class EquipmentController {
    */
   private async getEquipment(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { equipmentId } = req.params;
+      const equipmentId = req.params['equipmentId'] as string;
 
       const equipment = await this.equipmentRepository.findById(EquipmentId.create(equipmentId));
 

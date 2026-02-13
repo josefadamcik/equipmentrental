@@ -150,7 +150,7 @@ export class ReservationController {
    */
   private async getReservation(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { reservationId } = req.params;
+      const reservationId = req.params['reservationId'] as string;
 
       const reservation = await this.reservationRepository.findById(
         ReservationId.create(reservationId),
@@ -188,7 +188,7 @@ export class ReservationController {
    */
   private async cancelReservation(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { reservationId } = req.params;
+      const reservationId = req.params['reservationId'] as string;
       // req.body has already been validated by validateBody(cancelReservationSchema)
       const body = req.body as import('../validation/schemas.js').CancelReservationInput;
 
@@ -229,7 +229,7 @@ export class ReservationController {
    */
   private async confirmReservation(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { reservationId } = req.params;
+      const reservationId = req.params['reservationId'] as string;
       // req.body has already been validated by validateBody(confirmReservationSchema)
       const body = req.body as import('../validation/schemas.js').ConfirmReservationInput;
 
@@ -259,7 +259,7 @@ export class ReservationController {
    */
   private async fulfillReservation(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { reservationId } = req.params;
+      const reservationId = req.params['reservationId'] as string;
       // req.body has already been validated by validateBody(fulfillReservationSchema)
       const body = req.body as import('../validation/schemas.js').FulfillReservationInput;
 
