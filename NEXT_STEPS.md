@@ -638,6 +638,66 @@ Automate testing and deployment:
   - Release process documentation
   - Contributing guidelines with quality standards
 
+## Phase 7: Review Improvements
+
+Based on the architectural review (REVIEW_1.md), the following improvements are recommended:
+
+### 7.1 Money Value Object: Integer-Based Arithmetic ✅ COMPLETED
+Convert the `Money` value object from floating-point to integer (cents) internally to eliminate floating-point precision issues. The public API (`amount` getter, `dollars()` factory) should remain dollar-based for backward compatibility, but all internal storage and arithmetic should use integer cents.
+
+**Files modified**:
+- ✅ `src/domain/value-objects/Money.ts` - Refactored to store cents internally as `_cents: number`
+- ✅ `src/domain/value-objects/__tests__/Money.test.ts` - Added 15 new tests including precision edge-cases
+
+**Acceptance criteria**:
+- ✅ Internal storage uses integer cents (`_cents` private field)
+- ✅ `amount` property still returns dollar value (backward compatible getter)
+- ✅ `cents` getter exposes raw integer cents
+- ✅ `fromCents(cents)` static factory added
+- ✅ `add`, `subtract`, `multiply` use integer math
+- ✅ All existing tests pass (1156 total)
+- ✅ New tests cover floating-point edge cases (0.1 + 0.2 = 0.3, repeated additions, multiply drift)
+
+### 7.2 HTTP Input Validation with Zod
+Replace manual imperative validation in HTTP controllers with Zod schemas. Create validation schemas for all request DTOs and a reusable validation middleware.
+
+**Files to create**:
+- `src/adapters/inbound/http/validation/schemas.ts` - Zod schemas for all request DTOs
+- `src/adapters/inbound/http/validation/middleware.ts` - Reusable validation middleware
+
+**Files to modify**:
+- `src/adapters/inbound/http/controllers/RentalController.ts` - Use Zod schemas
+- `src/adapters/inbound/http/controllers/EquipmentController.ts` - Use Zod schemas
+- `src/adapters/inbound/http/controllers/MemberController.ts` - Use Zod schemas
+- `src/adapters/inbound/http/controllers/ReservationController.ts` - Use Zod schemas
+- `package.json` - Add zod dependency
+
+**Acceptance criteria**:
+- All manual validation replaced with Zod schemas
+- Validation errors return structured error messages
+- All existing controller tests pass
+- New tests cover Zod validation edge cases
+
+### 7.3 StripePaymentService: Persistent Payment Intent Storage
+Replace the in-memory `Map<string, Stripe.PaymentIntent>` in `StripePaymentService` with a repository-backed persistent storage via a new port, maintaining the hexagonal architecture pattern.
+
+**Files to create**:
+- `src/domain/ports/PaymentIntentRepository.ts` - Port for payment intent persistence
+- `src/adapters/outbound/persistence/InMemoryPaymentIntentRepository.ts` - In-memory impl for testing
+- `src/adapters/outbound/persistence/PrismaPaymentIntentRepository.ts` - Prisma impl for production
+
+**Files to modify**:
+- `src/adapters/outbound/payment/StripePaymentService.ts` - Use PaymentIntentRepository port
+- `prisma/schema.prisma` - Add PaymentIntent model
+- `src/infrastructure/di/Container.ts` - Wire new repository
+- `src/infrastructure/di/types.ts` - Add DI token
+
+**Acceptance criteria**:
+- Payment intents persisted via repository port
+- In-memory and Prisma implementations available
+- DI container wires the correct implementation based on config
+- All existing payment tests pass
+
 ## Recommended Implementation Order
 
 1. **Start with Value Objects** - They have no dependencies
