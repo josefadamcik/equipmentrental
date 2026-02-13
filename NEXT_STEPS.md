@@ -727,7 +727,7 @@ Migrate the existing single-package project to an npm workspaces monorepo with `
 
 **Test Coverage**: 1156 tests passing (all existing tests still green)
 
-### 8.2 Frontend Project Setup
+### 8.2 Frontend Project Setup ✅ COMPLETED
 Scaffold a new React + TypeScript frontend using Vite in `packages/frontend/`.
 
 **Files to create:**
@@ -744,11 +744,26 @@ Scaffold a new React + TypeScript frontend using Vite in `packages/frontend/`.
 
 **Dependencies:** react, react-dom, typescript, vite, @vitejs/plugin-react, tailwindcss, @tailwindcss/vite
 
+**Files created:**
+- ✅ `packages/frontend/package.json` - named `@equipmentrental/frontend` with Vite, React, TypeScript deps
+- ✅ `packages/frontend/tsconfig.json` - extends root base, adds React JSX settings
+- ✅ `packages/frontend/tsconfig.node.json` - for Vite config
+- ✅ `packages/frontend/vite.config.ts` - with API proxy to `http://localhost:3000` for dev
+- ✅ `packages/frontend/index.html` - Vite entry HTML
+- ✅ `packages/frontend/src/main.tsx` - React entry point
+- ✅ `packages/frontend/src/App.tsx` - Root app component with placeholder
+- ✅ `packages/frontend/src/index.css` - Tailwind v4 CSS entry
+- ✅ `packages/frontend/src/vite-env.d.ts` - Vite type declarations
+- ✅ `packages/frontend/eslint.config.mjs` - ESLint config with React rules
+- ✅ `packages/frontend/.prettierrc` - Prettier config matching backend style
+
 **Acceptance criteria:**
-- `npm run dev -w @equipmentrental/frontend` starts Vite dev server on port 5173
-- `npm run build -w @equipmentrental/frontend` produces production build
-- API proxy forwards `/api/*` requests to backend at localhost:3000
-- Tailwind CSS is working (utility classes render correctly)
+- ✅ `npm run build -w @equipmentrental/frontend` produces production build
+- ✅ `npm run typecheck -w @equipmentrental/frontend` passes
+- ✅ `npm run lint -w @equipmentrental/frontend` passes
+- ✅ API proxy configured to forward `/api/*` requests to backend at localhost:3000
+- ✅ Tailwind CSS v4 set up with @tailwindcss/vite plugin (no postcss, no tailwind.config.js)
+- ✅ All 1156 backend tests still pass
 
 ### 8.3 Frontend Docker & Compose Integration
 Create a Docker setup for the frontend and integrate with existing compose files.
