@@ -14,6 +14,7 @@ export const DI_TOKENS = {
   MemberRepository: Symbol.for('MemberRepository'),
   RentalRepository: Symbol.for('RentalRepository'),
   ReservationRepository: Symbol.for('ReservationRepository'),
+  PaymentIntentRepository: Symbol.for('PaymentIntentRepository'),
 
   // Services (Ports)
   PaymentService: Symbol.for('PaymentService'),

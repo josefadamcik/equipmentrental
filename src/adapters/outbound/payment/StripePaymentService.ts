@@ -7,6 +7,7 @@ import {
   PaymentMethod,
   PaymentStatus,
 } from '../../../domain/ports/PaymentService.js';
+import { PaymentIntentRepository } from '../../../domain/ports/PaymentIntentRepository.js';
 
 /**
  * Configuration for Stripe payment service
@@ -45,14 +46,9 @@ export interface StripePaymentConfig {
 export class StripePaymentService implements PaymentService {
   private stripe: Stripe;
   private config: Required<StripePaymentConfig>;
+  private paymentIntentRepo: PaymentIntentRepository;
 
-  /**
-   * In-memory store for payment intents and authorizations
-   * In production, this should be persisted in a database
-   */
-  private paymentIntents: Map<string, Stripe.PaymentIntent> = new Map();
-
-  constructor(config: StripePaymentConfig) {
+  constructor(config: StripePaymentConfig, paymentIntentRepo: PaymentIntentRepository) {
     this.config = {
       apiVersion: '2025-12-15.clover',
       applicationName: 'Equipment Rental System',
@@ -68,6 +64,8 @@ export class StripePaymentService implements PaymentService {
         name: this.config.applicationName,
       },
     });
+
+    this.paymentIntentRepo = paymentIntentRepo;
   }
 
   async processPayment(
@@ -105,8 +103,21 @@ export class StripePaymentService implements PaymentService {
         this.getIdempotencyOptions(`payment-${rentalId.value}-${Date.now()}`),
       );
 
-      // Store payment intent
-      this.paymentIntents.set(paymentIntent.id, paymentIntent);
+      // Persist payment intent record
+      await this.paymentIntentRepo.save({
+        id: paymentIntent.id,
+        rentalId: rentalId.value,
+        amount: paymentIntent.amount,
+        currency: paymentIntent.currency,
+        status: paymentIntent.status,
+        metadata: {
+          rentalId: rentalId.value,
+          memberId: memberId.value,
+          paymentMethod: method,
+        },
+        createdAt: new Date(paymentIntent.created * 1000),
+        updatedAt: new Date(),
+      });
 
       // For testing purposes, we'll consider the intent created as successful
       // In production, you would need to confirm the payment with a payment method
@@ -196,7 +207,20 @@ export class StripePaymentService implements PaymentService {
         this.getIdempotencyOptions(`auth-${memberId.value}-${Date.now()}`),
       );
 
-      this.paymentIntents.set(paymentIntent.id, paymentIntent);
+      await this.paymentIntentRepo.save({
+        id: paymentIntent.id,
+        rentalId: memberId.value, // no rentalId at authorization time; use memberId as correlation key
+        amount: paymentIntent.amount,
+        currency: paymentIntent.currency,
+        status: paymentIntent.status,
+        metadata: {
+          memberId: memberId.value,
+          paymentMethod: method,
+          type: 'authorization',
+        },
+        createdAt: new Date(paymentIntent.created * 1000),
+        updatedAt: new Date(),
+      });
 
       return {
         transactionId: paymentIntent.id,

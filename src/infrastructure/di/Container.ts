@@ -8,6 +8,7 @@ import { ReservationRepository } from '../../domain/ports/ReservationRepository.
 import { PaymentService } from '../../domain/ports/PaymentService.js';
 import { NotificationService } from '../../domain/ports/NotificationService.js';
 import { EventPublisher } from '../../domain/ports/EventPublisher.js';
+import { PaymentIntentRepository } from '../../domain/ports/PaymentIntentRepository.js';
 
 // Application Services
 import { RentalService } from '../../application/services/RentalService.js';
@@ -33,12 +34,14 @@ import { InMemoryEquipmentRepository } from '../../adapters/outbound/persistence
 import { InMemoryMemberRepository } from '../../adapters/outbound/persistence/InMemoryMemberRepository.js';
 import { InMemoryRentalRepository } from '../../adapters/outbound/persistence/InMemoryRentalRepository.js';
 import { InMemoryReservationRepository } from '../../adapters/outbound/persistence/InMemoryReservationRepository.js';
+import { InMemoryPaymentIntentRepository } from '../../adapters/outbound/persistence/InMemoryPaymentIntentRepository.js';
 
 // Adapters - Persistence (Prisma)
 import { PrismaEquipmentRepository } from '../../adapters/outbound/persistence/PrismaEquipmentRepository.js';
 import { PrismaMemberRepository } from '../../adapters/outbound/persistence/PrismaMemberRepository.js';
 import { PrismaRentalRepository } from '../../adapters/outbound/persistence/PrismaRentalRepository.js';
 import { PrismaReservationRepository } from '../../adapters/outbound/persistence/PrismaReservationRepository.js';
+import { PrismaPaymentIntentRepository } from '../../adapters/outbound/persistence/PrismaPaymentIntentRepository.js';
 
 // Adapters - Services
 import { MockPaymentService } from '../../adapters/outbound/payment/MockPaymentService.js';
@@ -205,6 +208,10 @@ export class Container {
         DI_TOKENS.ReservationRepository,
         () => new InMemoryReservationRepository(),
       );
+      this.registerSingleton(
+        DI_TOKENS.PaymentIntentRepository,
+        () => new InMemoryPaymentIntentRepository(),
+      );
     } else {
       // Prisma adapters (for production)
       const prisma = this.resolve<PrismaClient>(DI_TOKENS.PrismaClient);
@@ -217,6 +224,10 @@ export class Container {
       this.registerSingleton(
         DI_TOKENS.ReservationRepository,
         () => new PrismaReservationRepository(prisma),
+      );
+      this.registerSingleton(
+        DI_TOKENS.PaymentIntentRepository,
+        () => new PrismaPaymentIntentRepository(prisma),
       );
     }
   }
@@ -232,10 +243,12 @@ export class Container {
       if (!this.config.stripeConfig) {
         throw new Error('Stripe configuration is required when useMockPayment is false');
       }
-      this.registerSingleton(
-        DI_TOKENS.PaymentService,
-        () => new StripePaymentService(this.config.stripeConfig!),
-      );
+      this.registerSingleton(DI_TOKENS.PaymentService, () => {
+        const paymentIntentRepo = this.resolve<PaymentIntentRepository>(
+          DI_TOKENS.PaymentIntentRepository,
+        );
+        return new StripePaymentService(this.config.stripeConfig!, paymentIntentRepo);
+      });
     }
 
     // Notification service

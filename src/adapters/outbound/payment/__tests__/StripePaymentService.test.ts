@@ -3,12 +3,14 @@ import { StripePaymentService } from '../StripePaymentService.js';
 import { Money } from '../../../../domain/value-objects/Money.js';
 import { RentalId, MemberId } from '../../../../domain/value-objects/identifiers.js';
 import { PaymentMethod, PaymentStatus } from '../../../../domain/ports/PaymentService.js';
+import { InMemoryPaymentIntentRepository } from '../../../outbound/persistence/InMemoryPaymentIntentRepository.js';
 
 // Mock Stripe
 jest.mock('stripe');
 
 describe('StripePaymentService', () => {
   let service: StripePaymentService;
+  let paymentIntentRepo: InMemoryPaymentIntentRepository;
   let mockStripe: {
     paymentIntents: {
       create: jest.Mock;
@@ -45,11 +47,17 @@ describe('StripePaymentService', () => {
     // Mock Stripe constructor
     (Stripe as unknown as jest.Mock).mockImplementation(() => mockStripe);
 
+    // In-memory repository for payment intents
+    paymentIntentRepo = new InMemoryPaymentIntentRepository();
+
     // Initialize service
-    service = new StripePaymentService({
-      apiKey: 'sk_test_12345',
-      enableIdempotency: true,
-    });
+    service = new StripePaymentService(
+      {
+        apiKey: 'sk_test_12345',
+        enableIdempotency: true,
+      },
+      paymentIntentRepo,
+    );
 
     // Create test identifiers
     rentalId = RentalId.generate();
@@ -68,11 +76,14 @@ describe('StripePaymentService', () => {
     });
 
     it('should accept custom configuration', () => {
-      new StripePaymentService({
-        apiKey: 'sk_test_custom',
-        applicationName: 'Custom App',
-        timeout: 60000,
-      });
+      new StripePaymentService(
+        {
+          apiKey: 'sk_test_custom',
+          applicationName: 'Custom App',
+          timeout: 60000,
+        },
+        new InMemoryPaymentIntentRepository(),
+      );
 
       expect(Stripe).toHaveBeenCalledWith('sk_test_custom', {
         apiVersion: '2025-12-15.clover',

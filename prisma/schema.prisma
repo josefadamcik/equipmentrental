@@ -112,6 +112,21 @@ model Reservation {
   @@index([endDate])
 }
 
+// PaymentIntent model - persists Stripe payment intent records
+model PaymentIntent {
+  id          String   @id
+  rentalId    String
+  amount      Float
+  currency    String
+  status      String
+  metadata    String   @default("{}") // JSON-encoded Record<string, string>
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([rentalId])
+  @@index([status])
+}
+
 // DamageAssessment model - represents equipment condition evaluations
 model DamageAssessment {
   id                    String        @id
