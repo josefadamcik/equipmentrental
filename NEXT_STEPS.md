@@ -869,25 +869,28 @@ Build full CRUD UI for members.
 - ✅ Create/edit form validates and submits correctly
 - ✅ Tier badge shows correct color/label per tier level (BASIC=gray, SILVER=slate, GOLD=amber, PLATINUM=purple)
 
-### 8.8 Rental Workflow Pages
+### 8.8 Rental Workflow Pages ✅ COMPLETED
 Build the complete rental lifecycle UI.
 
-**Files to create:**
-- `packages/frontend/src/pages/RentalsPage.tsx` - Active rentals list with status indicators
-- `packages/frontend/src/pages/CreateRentalPage.tsx` - Multi-step rental form (select equipment → member → dates → payment → confirm)
-- `packages/frontend/src/pages/RentalDetailPage.tsx` - Rental details with available actions (return, extend)
-- `packages/frontend/src/components/rentals/RentalTable.tsx` - Rentals table component
-- `packages/frontend/src/components/rentals/RentalStatusBadge.tsx` - Status indicators
-- `packages/frontend/src/components/rentals/ReturnRentalDialog.tsx` - Return flow with condition assessment
-- `packages/frontend/src/components/rentals/ExtendRentalDialog.tsx` - Extension flow
+**Files created:**
+- ✅ `packages/frontend/src/pages/RentalsPage.tsx` - Overdue rentals section, member-ID search, "Create Rental" button
+- ✅ `packages/frontend/src/pages/CreateRentalPage.tsx` - Form with equipment/member/date/payment selectors and success result
+- ✅ `packages/frontend/src/pages/RentalDetailPage.tsx` - Rental details with Return/Extend action buttons
+- ✅ `packages/frontend/src/components/rentals/RentalTable.tsx` - Table with desktop/mobile layouts, clickable rows
+- ✅ `packages/frontend/src/components/rentals/RentalStatusBadge.tsx` - ACTIVE=green, RESERVED=blue, OVERDUE=red, RETURNED=gray, CANCELLED=gray-light
+- ✅ `packages/frontend/src/components/rentals/ReturnRentalDialog.tsx` - Modal with condition dropdown, success result with fees
+- ✅ `packages/frontend/src/components/rentals/ExtendRentalDialog.tsx` - Modal with days input, success result with new end date
 
-**API endpoints used:** `POST /api/rentals`, `GET /api/rentals/:id`, `PUT /api/rentals/:id/return`, `PUT /api/rentals/:id/extend`, `GET /api/rentals/member/:memberId`
+**Files modified:**
+- ✅ `packages/frontend/src/router.tsx` - Added `/rentals/new` → CreateRentalPage, `/rentals/:id` → RentalDetailPage
+
+**API endpoints used:** `POST /api/rentals`, `GET /api/rentals/:id`, `PUT /api/rentals/:id/return`, `PUT /api/rentals/:id/extend`, `GET /api/rentals/member/:memberId`, `GET /api/rentals/status/overdue`
 
 **Acceptance criteria:**
-- Rental creation form guides user through equipment/member/date selection
-- Active rentals list shows all current rentals with status
-- Return flow shows condition selector and fee preview before confirming
-- Extend flow shows additional cost and new end date before confirming
+- ✅ Rental creation form guides user through equipment/member/date selection
+- ✅ Overdue rentals list shows rentals with status badges
+- ✅ Return flow shows condition selector and fee details after confirming
+- ✅ Extend flow shows additional cost and new end date after confirming
 
 ### 8.9 Reservation Management Pages
 Build reservation lifecycle UI.

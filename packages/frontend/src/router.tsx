@@ -8,6 +8,8 @@ import MembersListPage from './pages/MembersListPage';
 import MemberDetailPage from './pages/MemberDetailPage';
 import MemberFormPage from './pages/MemberFormPage';
 import RentalsPage from './pages/RentalsPage';
+import CreateRentalPage from './pages/CreateRentalPage';
+import RentalDetailPage from './pages/RentalDetailPage';
 import ReservationsPage from './pages/ReservationsPage';
 
 const router = createBrowserRouter([
@@ -30,10 +32,10 @@ const router = createBrowserRouter([
       { path: 'members/:id', element: <MemberDetailPage /> },
       { path: 'members/:id/edit', element: <MemberFormPage /> },
 
-      // Rental routes (placeholders for later steps)
+      // Rental routes
       { path: 'rentals', element: <RentalsPage /> },
-      { path: 'rentals/new', element: <div className="text-gray-500">New Rental — coming soon</div> },
-      { path: 'rentals/:id', element: <div className="text-gray-500">Rental Detail — coming soon</div> },
+      { path: 'rentals/new', element: <CreateRentalPage /> },
+      { path: 'rentals/:id', element: <RentalDetailPage /> },
 
       // Reservation routes (placeholders for later steps)
       { path: 'reservations', element: <ReservationsPage /> },
