@@ -847,23 +847,27 @@ Build full CRUD UI for equipment.
 - ✅ Create form validates inputs and submits to API
 - ✅ Detail page shows equipment info and current rental status
 
-### 8.7 Member Management Pages
+### 8.7 Member Management Pages ✅ COMPLETED
 Build full CRUD UI for members.
 
-**Files to create:**
-- `packages/frontend/src/pages/MembersListPage.tsx` - Table with search, filter by tier/status
-- `packages/frontend/src/pages/MemberDetailPage.tsx` - Profile, active rentals, rental history
-- `packages/frontend/src/pages/MemberFormPage.tsx` - Create/edit member form
-- `packages/frontend/src/components/members/MemberTable.tsx` - Reusable table component
-- `packages/frontend/src/components/members/TierBadge.tsx` - Membership tier indicator
+**Files created:**
+- ✅ `packages/frontend/src/pages/MembersListPage.tsx` - Table with search, filter by tier/status, loading/error/empty states
+- ✅ `packages/frontend/src/pages/MemberDetailPage.tsx` - Profile, active rentals, rental history
+- ✅ `packages/frontend/src/pages/MemberFormPage.tsx` - Create/edit member form with validation
+- ✅ `packages/frontend/src/components/members/MemberTable.tsx` - Reusable table with desktop table + mobile card layout
+- ✅ `packages/frontend/src/components/members/TierBadge.tsx` - TierBadge + ActiveStatusBadge components
+- ✅ `packages/frontend/src/components/members/MemberFilters.tsx` - Search input, tier dropdown, status dropdown
 
-**API endpoints used:** `GET /api/members`, `GET /api/members/:id`, `POST /api/members`, `PUT /api/members/:id`, `GET /api/rentals/member/:id`
+**Files modified:**
+- ✅ `packages/frontend/src/router.tsx` - Added `/members/new`, `/members/:id`, `/members/:id/edit` routes
+
+**API endpoints used:** `GET /api/members`, `GET /api/members/:id`, `POST /api/members`, `PUT /api/members/:id`, `GET /api/members/:id/rentals`
 
 **Acceptance criteria:**
-- Member list loads from API with search and tier filtering
-- Member detail shows profile and associated rentals
-- Create/edit form validates and submits correctly
-- Tier badge shows correct color/label per tier level
+- ✅ Member list loads from API with search and tier filtering
+- ✅ Member detail shows profile and associated rentals
+- ✅ Create/edit form validates and submits correctly
+- ✅ Tier badge shows correct color/label per tier level (BASIC=gray, SILVER=slate, GOLD=amber, PLATINUM=purple)
 
 ### 8.8 Rental Workflow Pages
 Build the complete rental lifecycle UI.

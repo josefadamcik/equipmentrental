@@ -5,6 +5,8 @@ import EquipmentListPage from './pages/EquipmentListPage';
 import EquipmentDetailPage from './pages/EquipmentDetailPage';
 import EquipmentFormPage from './pages/EquipmentFormPage';
 import MembersListPage from './pages/MembersListPage';
+import MemberDetailPage from './pages/MemberDetailPage';
+import MemberFormPage from './pages/MemberFormPage';
 import RentalsPage from './pages/RentalsPage';
 import ReservationsPage from './pages/ReservationsPage';
 
@@ -22,10 +24,11 @@ const router = createBrowserRouter([
       { path: 'equipment/:id', element: <EquipmentDetailPage /> },
       { path: 'equipment/:id/edit', element: <EquipmentFormPage /> },
 
-      // Member routes (placeholders for later steps)
+      // Member routes
       { path: 'members', element: <MembersListPage /> },
-      { path: 'members/new', element: <div className="text-gray-500">New Member — coming soon</div> },
-      { path: 'members/:id', element: <div className="text-gray-500">Member Detail — coming soon</div> },
+      { path: 'members/new', element: <MemberFormPage /> },
+      { path: 'members/:id', element: <MemberDetailPage /> },
+      { path: 'members/:id/edit', element: <MemberFormPage /> },
 
       // Rental routes (placeholders for later steps)
       { path: 'rentals', element: <RentalsPage /> },
