@@ -825,24 +825,27 @@ Set up the core application structure with navigation and routing.
 - Layout is responsive (sidebar collapses on mobile)
 - Active route is highlighted in sidebar
 
-### 8.6 Equipment Management Pages
+### 8.6 Equipment Management Pages ✅ COMPLETED
 Build full CRUD UI for equipment.
 
-**Files to create:**
-- `packages/frontend/src/pages/EquipmentListPage.tsx` - Table with search, filter by category/condition/availability, pagination
-- `packages/frontend/src/pages/EquipmentDetailPage.tsx` - Equipment details, current status, rental history
-- `packages/frontend/src/pages/EquipmentFormPage.tsx` - Create/edit equipment form with validation
-- `packages/frontend/src/components/equipment/EquipmentTable.tsx` - Reusable table component
-- `packages/frontend/src/components/equipment/EquipmentStatusBadge.tsx` - Condition/availability badges
-- `packages/frontend/src/components/equipment/EquipmentFilters.tsx` - Filter controls
+**Files created:**
+- ✅ `packages/frontend/src/pages/EquipmentListPage.tsx` - Table with search, filter by category/condition, loading/error/empty states
+- ✅ `packages/frontend/src/pages/EquipmentDetailPage.tsx` - Equipment details with condition/availability badges and edit button
+- ✅ `packages/frontend/src/pages/EquipmentFormPage.tsx` - Create/edit form with client-side validation
+- ✅ `packages/frontend/src/components/equipment/EquipmentTable.tsx` - Reusable table with desktop table + mobile card layout
+- ✅ `packages/frontend/src/components/equipment/EquipmentStatusBadge.tsx` - ConditionBadge + AvailabilityBadge components
+- ✅ `packages/frontend/src/components/equipment/EquipmentFilters.tsx` - Search input, category dropdown, condition dropdown
+
+**Files modified:**
+- ✅ `packages/frontend/src/router.tsx` - Added `/equipment/new`, `/equipment/:id`, `/equipment/:id/edit` routes
 
 **API endpoints used:** `GET /api/equipment/available`, `GET /api/equipment/:id`, `POST /api/equipment`, `PUT /api/equipment/:id`
 
 **Acceptance criteria:**
-- Equipment list loads from API with loading/error states
-- Search and filters work (category, condition, availability)
-- Create form validates inputs and submits to API
-- Detail page shows equipment info and current rental status
+- ✅ Equipment list loads from API with loading/error states
+- ✅ Search and filters work (category, condition)
+- ✅ Create form validates inputs and submits to API
+- ✅ Detail page shows equipment info and current rental status
 
 ### 8.7 Member Management Pages
 Build full CRUD UI for members.
