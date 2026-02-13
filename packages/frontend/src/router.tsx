@@ -11,6 +11,8 @@ import RentalsPage from './pages/RentalsPage';
 import CreateRentalPage from './pages/CreateRentalPage';
 import RentalDetailPage from './pages/RentalDetailPage';
 import ReservationsPage from './pages/ReservationsPage';
+import CreateReservationPage from './pages/CreateReservationPage';
+import ReservationDetailPage from './pages/ReservationDetailPage';
 
 const router = createBrowserRouter([
   {
@@ -37,10 +39,10 @@ const router = createBrowserRouter([
       { path: 'rentals/new', element: <CreateRentalPage /> },
       { path: 'rentals/:id', element: <RentalDetailPage /> },
 
-      // Reservation routes (placeholders for later steps)
+      // Reservation routes
       { path: 'reservations', element: <ReservationsPage /> },
-      { path: 'reservations/new', element: <div className="text-gray-500">New Reservation — coming soon</div> },
-      { path: 'reservations/:id', element: <div className="text-gray-500">Reservation Detail — coming soon</div> },
+      { path: 'reservations/new', element: <CreateReservationPage /> },
+      { path: 'reservations/:id', element: <ReservationDetailPage /> },
     ],
   },
 ]);
