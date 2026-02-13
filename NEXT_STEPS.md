@@ -802,7 +802,7 @@ Create typed API client and TypeScript interfaces matching backend DTOs.
 - Error responses are typed and handled consistently
 - `useApi` hook provides loading, error, and data states
 
-### 8.5 App Shell, Routing & Layout
+### 8.5 App Shell, Routing & Layout ✅ COMPLETED
 Set up the core application structure with navigation and routing.
 
 **Dependencies:** react-router-dom
