@@ -681,25 +681,25 @@ Replace manual imperative validation in HTTP controllers with Zod schemas. Creat
 - ✅ All existing controller tests pass (1156 total)
 - ✅ All E2E tests pass including DELETE-based cancellation endpoints
 
-### 7.3 StripePaymentService: Persistent Payment Intent Storage
+### 7.3 StripePaymentService: Persistent Payment Intent Storage ✅ COMPLETED
 Replace the in-memory `Map<string, Stripe.PaymentIntent>` in `StripePaymentService` with a repository-backed persistent storage via a new port, maintaining the hexagonal architecture pattern.
 
-**Files to create**:
-- `src/domain/ports/PaymentIntentRepository.ts` - Port for payment intent persistence
-- `src/adapters/outbound/persistence/InMemoryPaymentIntentRepository.ts` - In-memory impl for testing
-- `src/adapters/outbound/persistence/PrismaPaymentIntentRepository.ts` - Prisma impl for production
+**Files created**:
+- ✅ `src/domain/ports/PaymentIntentRepository.ts` - Port for payment intent persistence
+- ✅ `src/adapters/outbound/persistence/InMemoryPaymentIntentRepository.ts` - In-memory impl for testing
+- ✅ `src/adapters/outbound/persistence/PrismaPaymentIntentRepository.ts` - Prisma impl for production
 
-**Files to modify**:
-- `src/adapters/outbound/payment/StripePaymentService.ts` - Use PaymentIntentRepository port
-- `prisma/schema.prisma` - Add PaymentIntent model
-- `src/infrastructure/di/Container.ts` - Wire new repository
-- `src/infrastructure/di/types.ts` - Add DI token
+**Files modified**:
+- ✅ `src/adapters/outbound/payment/StripePaymentService.ts` - Uses PaymentIntentRepository port
+- ✅ `prisma/schema.prisma` - Added PaymentIntent model
+- ✅ `src/infrastructure/di/Container.ts` - Wires InMemory/Prisma repository based on config
+- ✅ `src/infrastructure/di/types.ts` - Added PaymentIntentRepository DI token
 
 **Acceptance criteria**:
-- Payment intents persisted via repository port
-- In-memory and Prisma implementations available
-- DI container wires the correct implementation based on config
-- All existing payment tests pass
+- ✅ Payment intents persisted via repository port
+- ✅ In-memory and Prisma implementations available
+- ✅ DI container wires the correct implementation based on config
+- ✅ All existing payment tests pass (1156 tests total)
 
 ## Recommended Implementation Order
 
