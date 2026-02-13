@@ -6,14 +6,17 @@ import { GetOverdueRentalsQueryHandler } from '../../../../application/queries/G
 import { PaymentMethod } from '../../../../domain/ports/PaymentService.js';
 import { NotificationChannel } from '../../../../domain/ports/NotificationService.js';
 import {
-  CreateRentalRequest,
   CreateRentalResponse,
-  ReturnRentalRequest,
   ReturnRentalResponse,
-  ExtendRentalRequest,
   ExtendRentalResponse,
   GetRentalResponse,
 } from '../dtos/RentalDTOs.js';
+import { validateBody } from '../validation/middleware.js';
+import {
+  createRentalSchema,
+  returnRentalSchema,
+  extendRentalSchema,
+} from '../validation/schemas.js';
 
 /**
  * HTTP Controller for Rental operations
@@ -37,16 +40,24 @@ export class RentalController {
    */
   private setupRoutes(): void {
     // POST /api/rentals - Create a new rental
-    this.router.post('/', this.createRental.bind(this));
+    this.router.post('/', validateBody(createRentalSchema), this.createRental.bind(this));
 
     // GET /api/rentals/:rentalId - Get rental details
     this.router.get('/:rentalId', this.getRental.bind(this));
 
     // PUT /api/rentals/:rentalId/return - Return a rental
-    this.router.put('/:rentalId/return', this.returnRental.bind(this));
+    this.router.put(
+      '/:rentalId/return',
+      validateBody(returnRentalSchema),
+      this.returnRental.bind(this),
+    );
 
     // PUT /api/rentals/:rentalId/extend - Extend a rental
-    this.router.put('/:rentalId/extend', this.extendRental.bind(this));
+    this.router.put(
+      '/:rentalId/extend',
+      validateBody(extendRentalSchema),
+      this.extendRental.bind(this),
+    );
 
     // GET /api/rentals/overdue - Get overdue rentals
     this.router.get('/status/overdue', this.getOverdueRentals.bind(this));
@@ -68,55 +79,13 @@ export class RentalController {
    */
   private async createRental(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const body = req.body as CreateRentalRequest;
+      // req.body has already been validated and parsed by validateBody(createRentalSchema)
+      const body = req.body as import('../validation/schemas.js').CreateRentalInput;
 
-      // Validate required fields
-      if (!body.equipmentId || !body.memberId || !body.startDate || !body.endDate) {
-        res.status(400).json({
-          error: {
-            code: 'VALIDATION_ERROR',
-            message: 'Missing required fields: equipmentId, memberId, startDate, endDate',
-          },
-        });
-        return;
-      }
-
-      if (!body.paymentMethod || !body.paymentMethod.type) {
-        res.status(400).json({
-          error: {
-            code: 'VALIDATION_ERROR',
-            message: 'Missing required field: paymentMethod.type',
-          },
-        });
-        return;
-      }
-
-      // Parse dates
       const startDate = new Date(body.startDate);
       const endDate = new Date(body.endDate);
 
-      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-        res.status(400).json({
-          error: {
-            code: 'VALIDATION_ERROR',
-            message: 'Invalid date format. Use ISO 8601 format.',
-          },
-        });
-        return;
-      }
-
-      // Validate end date is after start date
-      if (endDate <= startDate) {
-        res.status(400).json({
-          error: {
-            code: 'VALIDATION_ERROR',
-            message: 'End date must be after start date',
-          },
-        });
-        return;
-      }
-
-      // Map payment method (currently we just use the type, token handling would be in payment adapter)
+      // Map payment method
       const paymentMethod = body.paymentMethod.type as PaymentMethod;
 
       // Map notification channel
@@ -193,35 +162,16 @@ export class RentalController {
   private async returnRental(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { rentalId } = req.params;
-      const body = req.body as ReturnRentalRequest;
-
-      // Validate required fields
-      if (!body.conditionAtReturn) {
-        res.status(400).json({
-          error: {
-            code: 'VALIDATION_ERROR',
-            message: 'Missing required field: conditionAtReturn',
-          },
-        });
-        return;
-      }
+      // req.body has already been validated by validateBody(returnRentalSchema)
+      const body = req.body as import('../validation/schemas.js').ReturnRentalInput;
 
       // Parse return date if provided
       let returnDate: Date | undefined;
       if (body.returnDate) {
         returnDate = new Date(body.returnDate);
-        if (isNaN(returnDate.getTime())) {
-          res.status(400).json({
-            error: {
-              code: 'VALIDATION_ERROR',
-              message: 'Invalid returnDate format. Use ISO 8601 format.',
-            },
-          });
-          return;
-        }
       }
 
-      // Map payment method if provided (currently we just use the type, token handling would be in payment adapter)
+      // Map payment method if provided
       let paymentMethod: PaymentMethod | undefined;
       if (body.paymentMethod) {
         paymentMethod = body.paymentMethod.type as PaymentMethod;
@@ -264,30 +214,10 @@ export class RentalController {
   private async extendRental(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { rentalId } = req.params;
-      const body = req.body as ExtendRentalRequest;
+      // req.body has already been validated by validateBody(extendRentalSchema)
+      const body = req.body as import('../validation/schemas.js').ExtendRentalInput;
 
-      // Validate required fields
-      if (!body.additionalDays || body.additionalDays <= 0) {
-        res.status(400).json({
-          error: {
-            code: 'VALIDATION_ERROR',
-            message: 'additionalDays must be a positive number',
-          },
-        });
-        return;
-      }
-
-      if (!body.paymentMethod || !body.paymentMethod.type) {
-        res.status(400).json({
-          error: {
-            code: 'VALIDATION_ERROR',
-            message: 'Missing required field: paymentMethod.type',
-          },
-        });
-        return;
-      }
-
-      // Map payment method (currently we just use the type, token handling would be in payment adapter)
+      // Map payment method
       const paymentMethod = body.paymentMethod.type as PaymentMethod;
 
       // Map notification channel

@@ -5,16 +5,19 @@ import { ReservationId } from '../../../../domain/value-objects/identifiers.js';
 import { PaymentMethod } from '../../../../domain/ports/PaymentService.js';
 import { NotificationChannel } from '../../../../domain/ports/NotificationService.js';
 import {
-  CreateReservationRequest,
   CreateReservationResponse,
-  CancelReservationRequest,
   CancelReservationResponse,
-  ConfirmReservationRequest,
   ConfirmReservationResponse,
-  FulfillReservationRequest,
   FulfillReservationResponse,
   GetReservationResponse,
 } from '../dtos/ReservationDTOs.js';
+import { validateBody } from '../validation/middleware.js';
+import {
+  createReservationSchema,
+  cancelReservationSchema,
+  confirmReservationSchema,
+  fulfillReservationSchema,
+} from '../validation/schemas.js';
 
 /**
  * HTTP Controller for Reservation operations
@@ -36,22 +39,38 @@ export class ReservationController {
    */
   private setupRoutes(): void {
     // POST /api/reservations - Create a new reservation
-    this.router.post('/', this.createReservation.bind(this));
+    this.router.post('/', validateBody(createReservationSchema), this.createReservation.bind(this));
 
     // GET /api/reservations/:reservationId - Get reservation details
     this.router.get('/:reservationId', this.getReservation.bind(this));
 
     // DELETE /api/reservations/:reservationId - Cancel a reservation (RESTful)
-    this.router.delete('/:reservationId', this.cancelReservation.bind(this));
+    this.router.delete(
+      '/:reservationId',
+      validateBody(cancelReservationSchema),
+      this.cancelReservation.bind(this),
+    );
 
     // PUT /api/reservations/:reservationId/cancel - Cancel a reservation (alternative)
-    this.router.put('/:reservationId/cancel', this.cancelReservation.bind(this));
+    this.router.put(
+      '/:reservationId/cancel',
+      validateBody(cancelReservationSchema),
+      this.cancelReservation.bind(this),
+    );
 
     // PUT /api/reservations/:reservationId/confirm - Confirm a reservation
-    this.router.put('/:reservationId/confirm', this.confirmReservation.bind(this));
+    this.router.put(
+      '/:reservationId/confirm',
+      validateBody(confirmReservationSchema),
+      this.confirmReservation.bind(this),
+    );
 
     // POST /api/reservations/:reservationId/fulfill - Fulfill a reservation
-    this.router.post('/:reservationId/fulfill', this.fulfillReservation.bind(this));
+    this.router.post(
+      '/:reservationId/fulfill',
+      validateBody(fulfillReservationSchema),
+      this.fulfillReservation.bind(this),
+    );
   }
 
   /**
@@ -67,34 +86,13 @@ export class ReservationController {
    */
   private async createReservation(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const body = req.body as CreateReservationRequest;
+      // req.body has already been validated by validateBody(createReservationSchema)
+      const body = req.body as import('../validation/schemas.js').CreateReservationInput;
 
-      // Validate required fields
-      if (!body.equipmentId || !body.memberId || !body.startDate || !body.endDate) {
-        res.status(400).json({
-          error: {
-            code: 'VALIDATION_ERROR',
-            message: 'Missing required fields: equipmentId, memberId, startDate, endDate',
-          },
-        });
-        return;
-      }
-
-      // Parse dates
       const startDate = new Date(body.startDate);
       const endDate = new Date(body.endDate);
 
-      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-        res.status(400).json({
-          error: {
-            code: 'VALIDATION_ERROR',
-            message: 'Invalid date format. Use ISO 8601 format.',
-          },
-        });
-        return;
-      }
-
-      // Map payment method if provided (currently we just use the type, token handling would be in payment adapter)
+      // Map payment method if provided
       let paymentMethod: PaymentMethod | undefined;
       if (body.paymentMethod) {
         paymentMethod = body.paymentMethod.type as PaymentMethod;
@@ -191,7 +189,8 @@ export class ReservationController {
   private async cancelReservation(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { reservationId } = req.params;
-      const body = (req.body || {}) as CancelReservationRequest;
+      // req.body has already been validated by validateBody(cancelReservationSchema)
+      const body = req.body as import('../validation/schemas.js').CancelReservationInput;
 
       // Map notification channel
       const notificationChannel: NotificationChannel | undefined = body.notificationChannel;
@@ -231,7 +230,8 @@ export class ReservationController {
   private async confirmReservation(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { reservationId } = req.params;
-      const body = req.body as ConfirmReservationRequest;
+      // req.body has already been validated by validateBody(confirmReservationSchema)
+      const body = req.body as import('../validation/schemas.js').ConfirmReservationInput;
 
       // Map notification channel
       const notificationChannel: NotificationChannel | undefined = body.notificationChannel;
@@ -260,20 +260,10 @@ export class ReservationController {
   private async fulfillReservation(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { reservationId } = req.params;
-      const body = req.body as FulfillReservationRequest;
+      // req.body has already been validated by validateBody(fulfillReservationSchema)
+      const body = req.body as import('../validation/schemas.js').FulfillReservationInput;
 
-      // Validate required fields
-      if (!body.paymentMethod || !body.paymentMethod.type) {
-        res.status(400).json({
-          error: {
-            code: 'VALIDATION_ERROR',
-            message: 'Missing required field: paymentMethod.type',
-          },
-        });
-        return;
-      }
-
-      // Map payment method (currently we just use the type, token handling would be in payment adapter)
+      // Map payment method
       const paymentMethod = body.paymentMethod.type as PaymentMethod;
 
       // Map notification channel

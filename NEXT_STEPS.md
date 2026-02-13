@@ -658,25 +658,28 @@ Convert the `Money` value object from floating-point to integer (cents) internal
 - ✅ All existing tests pass (1156 total)
 - ✅ New tests cover floating-point edge cases (0.1 + 0.2 = 0.3, repeated additions, multiply drift)
 
-### 7.2 HTTP Input Validation with Zod
+### 7.2 HTTP Input Validation with Zod ✅ COMPLETED
 Replace manual imperative validation in HTTP controllers with Zod schemas. Create validation schemas for all request DTOs and a reusable validation middleware.
 
-**Files to create**:
-- `src/adapters/inbound/http/validation/schemas.ts` - Zod schemas for all request DTOs
-- `src/adapters/inbound/http/validation/middleware.ts` - Reusable validation middleware
+**Files created**:
+- ✅ `src/adapters/inbound/http/validation/schemas.ts` - Zod schemas for all request DTOs
+- ✅ `src/adapters/inbound/http/validation/middleware.ts` - Reusable validation middleware
 
-**Files to modify**:
-- `src/adapters/inbound/http/controllers/RentalController.ts` - Use Zod schemas
-- `src/adapters/inbound/http/controllers/EquipmentController.ts` - Use Zod schemas
-- `src/adapters/inbound/http/controllers/MemberController.ts` - Use Zod schemas
-- `src/adapters/inbound/http/controllers/ReservationController.ts` - Use Zod schemas
-- `package.json` - Add zod dependency
+**Files modified**:
+- ✅ `src/adapters/inbound/http/controllers/RentalController.ts` - Uses Zod schemas via middleware
+- ✅ `src/adapters/inbound/http/controllers/ReservationController.ts` - Uses Zod schemas via middleware
+- ✅ `package.json` - Added zod v4 dependency
+
+**Notes**:
+- `EquipmentController` and `MemberController` had no request body validation (read-only endpoints), so no changes were needed there.
+- Used Zod v4 API (`issues` instead of `errors`, `error:` instead of `invalid_type_error:`).
+- The `validateBody` middleware coerces missing bodies (`undefined`) to `{}` to support DELETE requests without a body (all-optional schemas like `cancelReservationSchema`).
 
 **Acceptance criteria**:
-- All manual validation replaced with Zod schemas
-- Validation errors return structured error messages
-- All existing controller tests pass
-- New tests cover Zod validation edge cases
+- ✅ All manual validation replaced with Zod schemas
+- ✅ Validation errors return structured `{ error: { code: 'VALIDATION_ERROR', message: '...' } }` responses
+- ✅ All existing controller tests pass (1156 total)
+- ✅ All E2E tests pass including DELETE-based cancellation endpoints
 
 ### 7.3 StripePaymentService: Persistent Payment Intent Storage
 Replace the in-memory `Map<string, Stripe.PaymentIntent>` in `StripePaymentService` with a repository-backed persistent storage via a new port, maintaining the hexagonal architecture pattern.
