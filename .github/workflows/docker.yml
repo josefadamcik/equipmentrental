@@ -1,12 +1,13 @@
 name: Docker Build and Push
 
 on:
-  push:
-    branches: [master, main]
-    tags:
-      - 'v*.*.*'
-  pull_request:
-    branches: [master, main]
+  workflow_dispatch: # Manual trigger only - enable push/PR triggers when Docker is configured
+  # push:
+  #   branches: [master, main]
+  #   tags:
+  #     - 'v*.*.*'
+  # pull_request:
+  #   branches: [master, main]
 
 env:
   REGISTRY: ghcr.io
