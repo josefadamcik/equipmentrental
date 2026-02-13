@@ -68,6 +68,25 @@ services:
       retries: 3
       start_period: 40s
 
+  # Frontend (Development - Vite dev server)
+  frontend:
+    image: node:20-alpine
+    container_name: equipmentrental-frontend
+    working_dir: /app
+    restart: unless-stopped
+    depends_on:
+      - app
+    environment:
+      - VITE_API_URL=http://app:3000
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./packages/frontend:/app
+      - /app/node_modules
+    networks:
+      - equipmentrental-network
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+
   # Redis (Optional - for caching and session management)
   redis:
     image: redis:7-alpine

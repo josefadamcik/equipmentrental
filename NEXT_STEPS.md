@@ -765,22 +765,24 @@ Scaffold a new React + TypeScript frontend using Vite in `packages/frontend/`.
 - ✅ Tailwind CSS v4 set up with @tailwindcss/vite plugin (no postcss, no tailwind.config.js)
 - ✅ All 1156 backend tests still pass
 
-### 8.3 Frontend Docker & Compose Integration
+### 8.3 Frontend Docker & Compose Integration ✅ COMPLETED
 Create a Docker setup for the frontend and integrate with existing compose files.
 
-**Files to create:**
-- `packages/frontend/Dockerfile` - multi-stage build: node (build) → nginx (serve)
-- `packages/frontend/nginx.conf` - nginx config with SPA fallback and `/api` proxy
+**Files created:**
+- ✅ `packages/frontend/Dockerfile` - multi-stage build: node:20-alpine (build) → nginx:alpine (serve)
+- ✅ `packages/frontend/nginx.conf` - nginx config with SPA fallback, `/api` proxy to `app:3000`, gzip compression, and static asset cache headers
+- ✅ `packages/frontend/.dockerignore` - excludes node_modules, dist, .env*, etc.
 
-**Files to modify:**
-- `docker-compose.yml` - add `frontend` service (port 5173 dev with Vite, volume mounts)
-- `docker-compose.prod.yml` - add `frontend` service (port 80, nginx serving static files, API proxy to backend)
+**Files modified:**
+- ✅ `docker-compose.yml` - added `frontend` service (node:20-alpine with Vite dev server on port 5173, volume mounts for hot reload)
+- ✅ `docker-compose.prod.yml` - added `frontend` service (port 80, nginx multi-stage build serving static files with API proxy to backend)
 
 **Acceptance criteria:**
-- `docker compose up` starts both backend and frontend
-- Frontend dev server accessible at localhost:5173
-- API requests from frontend proxy to backend correctly
-- Production build serves static files via nginx
+- ✅ `docker compose up` starts both backend and frontend
+- ✅ Frontend dev server accessible at localhost:5173
+- ✅ API requests from frontend proxy to backend correctly (nginx `/api/` → `http://app:3000`)
+- ✅ Production build serves static files via nginx
+- ✅ All 1156 backend tests still pass
 
 ### 8.4 API Client & Shared Types
 Create typed API client and TypeScript interfaces matching backend DTOs.

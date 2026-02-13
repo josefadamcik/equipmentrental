@@ -115,6 +115,34 @@ services:
     # ports:
     #   - "6379:6379"
 
+  # Frontend (Production - nginx serving static files + API proxy)
+  frontend:
+    build:
+      context: ./packages/frontend
+      dockerfile: Dockerfile
+    container_name: equipmentrental-frontend-prod
+    restart: always
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+    networks:
+      - equipmentrental-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
+        reservations:
+          cpus: '0.1'
+          memory: 32M
+
   # Nginx Reverse Proxy (Optional - for SSL termination and load balancing)
   nginx:
     image: nginx:alpine
