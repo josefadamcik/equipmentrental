@@ -49,6 +49,15 @@ import {
 } from '../../../../domain/exceptions/MemberExceptions.js';
 import { RentalNotFoundError } from '../../../../domain/exceptions/RentalExceptions.js';
 
+// Helper to create dates relative to a single base timestamp, avoiding flaky
+// Math.ceil issues when two separate new Date() calls differ by milliseconds.
+function daysFromNow(offset: number): Date {
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  d.setMilliseconds(0);
+  return d;
+}
+
 describe('Command Handlers Integration Tests', () => {
   let equipmentRepo: InMemoryEquipmentRepository;
   let memberRepo: InMemoryMemberRepository;
@@ -99,10 +108,8 @@ describe('Command Handlers Integration Tests', () => {
       });
       await memberRepo.save(member);
 
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() + 1);
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() + 4);
+      const startDate = daysFromNow(1);
+      const endDate = daysFromNow(4);
 
       // Execute
       const result = await handler.execute({
@@ -154,9 +161,8 @@ describe('Command Handlers Integration Tests', () => {
       });
       await memberRepo.save(platinumMember);
 
-      const startDate = new Date();
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() + 1); // 1 day rental
+      const startDate = daysFromNow(0);
+      const endDate = daysFromNow(1); // 1 day rental
 
       const result = await handler.execute({
         equipmentId: equipment.id.value,
@@ -180,9 +186,8 @@ describe('Command Handlers Integration Tests', () => {
       });
       await memberRepo.save(member);
 
-      const startDate = new Date();
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() + 1);
+      const startDate = daysFromNow(0);
+      const endDate = daysFromNow(1);
 
       await expect(
         handler.execute({
@@ -215,9 +220,8 @@ describe('Command Handlers Integration Tests', () => {
       });
       await memberRepo.save(member);
 
-      const startDate = new Date();
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() + 1);
+      const startDate = daysFromNow(0);
+      const endDate = daysFromNow(1);
 
       await expect(
         handler.execute({
@@ -240,9 +244,8 @@ describe('Command Handlers Integration Tests', () => {
       });
       await equipmentRepo.save(equipment);
 
-      const startDate = new Date();
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() + 1);
+      const startDate = daysFromNow(0);
+      const endDate = daysFromNow(1);
 
       await expect(
         handler.execute({
@@ -274,9 +277,8 @@ describe('Command Handlers Integration Tests', () => {
       });
       await memberRepo.save(inactiveMember);
 
-      const startDate = new Date();
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() + 1);
+      const startDate = daysFromNow(0);
+      const endDate = daysFromNow(1);
 
       await expect(
         handler.execute({
@@ -311,9 +313,8 @@ describe('Command Handlers Integration Tests', () => {
       basicMember.incrementActiveRentals();
       await memberRepo.save(basicMember);
 
-      const startDate = new Date();
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() + 1);
+      const startDate = daysFromNow(0);
+      const endDate = daysFromNow(1);
 
       await expect(
         handler.execute({
@@ -345,9 +346,8 @@ describe('Command Handlers Integration Tests', () => {
       });
       await memberRepo.save(basicMember);
 
-      const startDate = new Date();
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() + 10); // 10 days exceeds BASIC limit
+      const startDate = daysFromNow(0);
+      const endDate = daysFromNow(10); // 10 days exceeds BASIC limit
 
       await expect(
         handler.execute({
@@ -380,10 +380,8 @@ describe('Command Handlers Integration Tests', () => {
       await memberRepo.save(member);
 
       // Create a conflicting reservation
-      const resStartDate = new Date();
-      resStartDate.setDate(resStartDate.getDate() + 2);
-      const resEndDate = new Date();
-      resEndDate.setDate(resEndDate.getDate() + 5);
+      const resStartDate = daysFromNow(2);
+      const resEndDate = daysFromNow(5);
 
       const reservation = Reservation.create({
         equipmentId: equipment.id,
@@ -394,10 +392,8 @@ describe('Command Handlers Integration Tests', () => {
       await reservationRepo.save(reservation);
 
       // Try to rent during reserved period
-      const rentalStartDate = new Date();
-      rentalStartDate.setDate(rentalStartDate.getDate() + 3);
-      const rentalEndDate = new Date();
-      rentalEndDate.setDate(rentalEndDate.getDate() + 4);
+      const rentalStartDate = daysFromNow(3);
+      const rentalEndDate = daysFromNow(4);
 
       await expect(
         handler.execute({
@@ -444,10 +440,8 @@ describe('Command Handlers Integration Tests', () => {
       member.incrementActiveRentals();
       await memberRepo.save(member);
 
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() - 2);
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() + 2); // Ends in 2 days, so not overdue
+      const startDate = daysFromNow(-2);
+      const endDate = daysFromNow(2); // Ends in 2 days, so not overdue
 
       const rental = Rental.create({
         equipmentId: equipment.id,
@@ -512,10 +506,8 @@ describe('Command Handlers Integration Tests', () => {
       await memberRepo.save(member);
 
       // Create overdue rental (ended 3 days ago)
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() - 10);
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() - 3);
+      const startDate = daysFromNow(-10);
+      const endDate = daysFromNow(-3);
 
       const rental = Rental.create({
         equipmentId: equipment.id,
@@ -559,9 +551,8 @@ describe('Command Handlers Integration Tests', () => {
       member.incrementActiveRentals();
       await memberRepo.save(member);
 
-      const startDate = new Date();
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() + 2);
+      const startDate = daysFromNow(0);
+      const endDate = daysFromNow(2);
 
       const rental = Rental.create({
         equipmentId: equipment.id,
@@ -629,9 +620,8 @@ describe('Command Handlers Integration Tests', () => {
       });
       await memberRepo.save(member);
 
-      const startDate = new Date();
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() + 3);
+      const startDate = daysFromNow(0);
+      const endDate = daysFromNow(3);
 
       const rental = Rental.create({
         equipmentId: equipment.id,
@@ -658,6 +648,7 @@ describe('Command Handlers Integration Tests', () => {
 
       // Verify new end date is 2 days later
       const expectedNewEndDate = new Date(originalEndDate);
+
       expectedNewEndDate.setDate(expectedNewEndDate.getDate() + 2);
       expect(result.newEndDate.getTime()).toBe(expectedNewEndDate.getTime());
 
@@ -687,9 +678,8 @@ describe('Command Handlers Integration Tests', () => {
       });
       await memberRepo.save(basicMember);
 
-      const startDate = new Date();
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() + 5); // 5 days
+      const startDate = daysFromNow(0);
+      const endDate = daysFromNow(5); // 5 days
 
       const rental = Rental.create({
         equipmentId: equipment.id,
@@ -729,9 +719,8 @@ describe('Command Handlers Integration Tests', () => {
       });
       await memberRepo.save(member);
 
-      const startDate = new Date();
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() + 3);
+      const startDate = daysFromNow(0);
+      const endDate = daysFromNow(3);
 
       const rental = Rental.create({
         equipmentId: equipment.id,
@@ -744,8 +733,10 @@ describe('Command Handlers Integration Tests', () => {
 
       // Create a reservation starting right after current rental
       const resStartDate = new Date(endDate);
+
       resStartDate.setDate(resStartDate.getDate() + 2);
       const resEndDate = new Date(resStartDate);
+
       resEndDate.setDate(resEndDate.getDate() + 3);
 
       const reservation = Reservation.create({
@@ -798,10 +789,8 @@ describe('Command Handlers Integration Tests', () => {
       });
       await memberRepo.save(member);
 
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() + 5);
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() + 8);
+      const startDate = daysFromNow(5);
+      const endDate = daysFromNow(8);
 
       const command: CreateReservationCommand = {
         equipmentId: equipment.id.value,
@@ -848,10 +837,8 @@ describe('Command Handlers Integration Tests', () => {
       await memberRepo.save(member);
 
       // Create existing reservation
-      const existingStartDate = new Date();
-      existingStartDate.setDate(existingStartDate.getDate() + 2);
-      const existingEndDate = new Date();
-      existingEndDate.setDate(existingEndDate.getDate() + 5);
+      const existingStartDate = daysFromNow(2);
+      const existingEndDate = daysFromNow(5);
 
       const existingReservation = Reservation.create({
         equipmentId: equipment.id,
@@ -862,10 +849,8 @@ describe('Command Handlers Integration Tests', () => {
       await reservationRepo.save(existingReservation);
 
       // Try to create conflicting reservation
-      const newStartDate = new Date();
-      newStartDate.setDate(newStartDate.getDate() + 3);
-      const newEndDate = new Date();
-      newEndDate.setDate(newEndDate.getDate() + 4);
+      const newStartDate = daysFromNow(3);
+      const newEndDate = daysFromNow(4);
 
       await expect(
         handler.execute({
@@ -897,10 +882,8 @@ describe('Command Handlers Integration Tests', () => {
       });
       await memberRepo.save(member);
 
-      const pastStartDate = new Date();
-      pastStartDate.setDate(pastStartDate.getDate() - 5);
-      const pastEndDate = new Date();
-      pastEndDate.setDate(pastEndDate.getDate() - 2);
+      const pastStartDate = daysFromNow(-5);
+      const pastEndDate = daysFromNow(-2);
 
       await expect(
         handler.execute({
@@ -921,10 +904,8 @@ describe('Command Handlers Integration Tests', () => {
     });
 
     it('should cancel reservation and update repository', async () => {
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() + 5);
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() + 8);
+      const startDate = daysFromNow(5);
+      const endDate = daysFromNow(8);
 
       const reservation = Reservation.create({
         equipmentId: { value: 'equipment-1' } as any,
@@ -970,10 +951,8 @@ describe('Command Handlers Integration Tests', () => {
       });
       await equipmentRepo.save(equipment);
 
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() - 5);
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() - 1);
+      const startDate = daysFromNow(-5);
+      const endDate = daysFromNow(-1);
 
       const rental = Rental.create({
         equipmentId: equipment.id,
