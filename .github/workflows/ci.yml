@@ -146,10 +146,10 @@ jobs:
         env:
           NODE_ENV: test
           DATABASE_URL: file:./equipmentrental_test.db
-        run: npm test -- --testPathPattern=integration
+        run: npm test -- --testPathPatterns=integration
 
       - name: Run E2E tests
         env:
           NODE_ENV: test
           DATABASE_URL: file:./equipmentrental_test.db
-        run: npm test -- --testPathPattern=e2e
+        run: npm test -- --testPathPatterns=e2e
