@@ -892,22 +892,27 @@ Build the complete rental lifecycle UI.
 - ✅ Return flow shows condition selector and fee details after confirming
 - ✅ Extend flow shows additional cost and new end date after confirming
 
-### 8.9 Reservation Management Pages
+### 8.9 Reservation Management Pages ✅ COMPLETED
 Build reservation lifecycle UI.
 
-**Files to create:**
-- `packages/frontend/src/pages/ReservationsPage.tsx` - Reservation list with status filters
-- `packages/frontend/src/pages/CreateReservationPage.tsx` - Reservation form
-- `packages/frontend/src/pages/ReservationDetailPage.tsx` - Details with actions (confirm, cancel, fulfill)
-- `packages/frontend/src/components/reservations/ReservationTable.tsx`
-- `packages/frontend/src/components/reservations/ReservationStatusBadge.tsx`
+**Files created:**
+- ✅ `packages/frontend/src/pages/ReservationsPage.tsx` - Search-by-ID lookup, recently viewed session list, Create Reservation button
+- ✅ `packages/frontend/src/pages/CreateReservationPage.tsx` - Equipment/member/date/payment form with validation and success result
+- ✅ `packages/frontend/src/pages/ReservationDetailPage.tsx` - Details with confirm/cancel/fulfill inline confirmation
+- ✅ `packages/frontend/src/components/reservations/ReservationTable.tsx` - Desktop table + mobile card layout, clickable rows
+- ✅ `packages/frontend/src/components/reservations/ReservationStatusBadge.tsx` - PENDING=yellow, CONFIRMED=blue, CANCELLED=gray, FULFILLED=green, EXPIRED=red
+
+**Files modified:**
+- ✅ `packages/frontend/src/router.tsx` - Added `/reservations/new` and `/reservations/:id` routes
 
 **API endpoints used:** `POST /api/reservations`, `GET /api/reservations/:id`, `PUT /api/reservations/:id/confirm`, `DELETE /api/reservations/:id`, `PUT /api/reservations/:id/fulfill`
 
 **Acceptance criteria:**
-- Reservation list with status filtering (pending, confirmed, cancelled, fulfilled)
-- Create form with equipment selection and date range picker
-- Action buttons for confirm/cancel/fulfill with confirmation dialogs
+- ✅ Search-by-ID lookup with instant preview card and recently-viewed session list
+- ✅ Create form with equipment/member dropdowns, future-only dates, payment method
+- ✅ Action buttons for confirm/cancel/fulfill with inline confirmation widgets (no browser confirm())
+- ✅ Status-based action gating: PENDING shows Confirm+Cancel, CONFIRMED shows Fulfill+Cancel, terminal statuses show info banner
+- ✅ All checks pass: typecheck, lint, build
 
 ### 8.10 Dashboard Page
 Build a summary dashboard with key metrics.
