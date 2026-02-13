@@ -914,21 +914,25 @@ Build reservation lifecycle UI.
 - ✅ Status-based action gating: PENDING shows Confirm+Cancel, CONFIRMED shows Fulfill+Cancel, terminal statuses show info banner
 - ✅ All checks pass: typecheck, lint, build
 
-### 8.10 Dashboard Page
+### 8.10 Dashboard Page ✅ COMPLETED
 Build a summary dashboard with key metrics.
 
-**Files to create:**
-- `packages/frontend/src/pages/DashboardPage.tsx` - Full dashboard layout
-- `packages/frontend/src/components/dashboard/StatCard.tsx` - Metric card component
-- `packages/frontend/src/components/dashboard/RecentActivityList.tsx` - Recent rental/reservation activity
-- `packages/frontend/src/components/dashboard/EquipmentAvailabilityChart.tsx` - Visual availability overview
+**Files created:**
+- ✅ `packages/frontend/src/pages/DashboardPage.tsx` - Full dashboard layout
+- ✅ `packages/frontend/src/components/dashboard/StatCard.tsx` - Metric card component
+- ✅ `packages/frontend/src/components/dashboard/RecentActivityList.tsx` - Overdue rental list
+- ✅ `packages/frontend/src/components/dashboard/EquipmentAvailabilityChart.tsx` - Visual availability overview
 
-**API endpoints used:** `GET /api/equipment/available`, `GET /api/rentals` (overdue), various list endpoints for counts
+**API endpoints used:** `GET /api/equipment/available`, `GET /api/rentals/status/overdue`, `GET /api/members`
 
 **Acceptance criteria:**
-- Summary cards: active rentals count, available equipment count, overdue rentals, total members
-- Recent activity feed showing latest rentals and reservations
-- Equipment availability overview
+- ✅ Summary cards: available equipment count, total members, overdue rentals, equipment utilisation %
+- ✅ Equipment availability chart (horizontal stacked bar, no chart library)
+- ✅ Recent overdue rentals list with status badges and links to detail pages
+- ✅ Independent loading states per section; coloured left-border StatCards linking to relevant pages
+- ✅ `npm run typecheck -w @equipmentrental/frontend` passes
+- ✅ `npm run lint -w @equipmentrental/frontend` passes
+- ✅ `npm run build -w @equipmentrental/frontend` succeeds
 
 ### 8.11 CI/CD & Vercel Configuration
 Update CI pipeline for monorepo and add Vercel deployment config.
