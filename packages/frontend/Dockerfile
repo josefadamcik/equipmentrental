@@ -9,7 +9,8 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install all dependencies (including devDependencies needed for build)
-RUN npm ci
+# Using npm install because package-lock.json is at monorepo root
+RUN npm install
 
 # Copy source code
 COPY . .

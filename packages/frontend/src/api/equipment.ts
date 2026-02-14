@@ -21,7 +21,7 @@ export interface GetAvailableEquipmentFilters {
 }
 
 /**
- * GET /api/equipment/available
+ * GET /api/equipment
  * Returns the list of available equipment, optionally filtered by category.
  */
 export function getAvailableEquipment(
@@ -32,7 +32,7 @@ export function getAvailableEquipment(
     params.set('category', filters.category);
   }
   const query = params.toString();
-  const path = query ? `/api/equipment/available?${query}` : '/api/equipment/available';
+  const path = query ? `/api/equipment?${query}` : '/api/equipment';
   return get<EquipmentResponse[]>(path);
 }
 

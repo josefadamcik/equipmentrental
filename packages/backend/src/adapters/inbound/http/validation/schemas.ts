@@ -94,6 +94,35 @@ export const fulfillReservationSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
+// Equipment schemas
+// ---------------------------------------------------------------------------
+
+const equipmentConditionSchema = z.enum([
+  'EXCELLENT',
+  'GOOD',
+  'FAIR',
+  'POOR',
+  'DAMAGED',
+  'UNDER_REPAIR',
+]);
+
+export const createEquipmentSchema = z.object({
+  name: z.string().min(1, 'name is required'),
+  description: z.string().optional().default(''),
+  category: z.string().min(1, 'category is required'),
+  dailyRate: z.number({ error: 'dailyRate must be a number' }).positive('dailyRate must be positive'),
+  condition: equipmentConditionSchema.optional().default('GOOD'),
+});
+
+export const updateEquipmentSchema = z.object({
+  name: z.string().min(1, 'name cannot be empty').optional(),
+  description: z.string().optional(),
+  category: z.string().min(1, 'category cannot be empty').optional(),
+  dailyRate: z.number({ error: 'dailyRate must be a number' }).positive('dailyRate must be positive').optional(),
+  condition: equipmentConditionSchema.optional(),
+});
+
+// ---------------------------------------------------------------------------
 // Inferred request types (usable in place of the manual DTOs for validation)
 // ---------------------------------------------------------------------------
 
@@ -105,3 +134,6 @@ export type CreateReservationInput = z.infer<typeof createReservationSchema>;
 export type CancelReservationInput = z.infer<typeof cancelReservationSchema>;
 export type ConfirmReservationInput = z.infer<typeof confirmReservationSchema>;
 export type FulfillReservationInput = z.infer<typeof fulfillReservationSchema>;
+
+export type CreateEquipmentInput = z.infer<typeof createEquipmentSchema>;
+export type UpdateEquipmentInput = z.infer<typeof updateEquipmentSchema>;

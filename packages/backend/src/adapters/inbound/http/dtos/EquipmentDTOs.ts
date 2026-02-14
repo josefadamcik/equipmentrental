@@ -16,6 +16,28 @@ export interface GetAvailableEquipmentResponse {
 }
 
 /**
+ * Request body for creating equipment
+ */
+export interface CreateEquipmentRequest {
+  name: string;
+  description?: string;
+  category: string;
+  dailyRate: number;
+  condition?: string;
+}
+
+/**
+ * Request body for updating equipment
+ */
+export interface UpdateEquipmentRequest {
+  name?: string;
+  description?: string;
+  category?: string;
+  dailyRate?: number;
+  condition?: string;
+}
+
+/**
  * Response body for getting equipment details
  */
 export interface GetEquipmentResponse {

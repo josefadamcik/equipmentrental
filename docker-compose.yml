@@ -58,7 +58,7 @@ services:
       - /app/node_modules
     networks:
       - equipmentrental-network
-    command: sh -c "npx prisma migrate deploy && npm run dev"
+    command: sh -c "npm install && npx prisma migrate deploy && npm run dev"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
       interval: 30s
@@ -82,6 +82,7 @@ services:
       - "5173:5173"
     volumes:
       - ./packages/frontend:/app
+      - ./tsconfig.base.json:/tsconfig.base.json:ro
       - /app/node_modules
     networks:
       - equipmentrental-network

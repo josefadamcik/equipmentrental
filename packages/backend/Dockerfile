@@ -19,7 +19,8 @@ COPY package*.json ./
 FROM base AS development
 
 # Install all dependencies (including devDependencies)
-RUN npm ci
+# Using npm install because package-lock.json is at monorepo root
+RUN npm install
 
 # Copy source code
 COPY . .
@@ -39,7 +40,7 @@ CMD ["npm", "run", "dev"]
 FROM base AS build
 
 # Install all dependencies (needed for build)
-RUN npm ci
+RUN npm install
 
 # Copy source code
 COPY . .

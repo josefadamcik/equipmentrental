@@ -1,90 +1,110 @@
 -- CreateTable
 CREATE TABLE "Equipment" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
     "category" TEXT NOT NULL,
-    "dailyRateAmount" REAL NOT NULL,
+    "dailyRateAmount" DOUBLE PRECISION NOT NULL,
     "dailyRateCurrency" TEXT NOT NULL DEFAULT 'USD',
     "condition" TEXT NOT NULL,
     "isAvailable" BOOLEAN NOT NULL DEFAULT true,
     "currentRentalId" TEXT,
-    "lastMaintenanceDate" DATETIME,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
+    "purchaseDate" TIMESTAMP(3) NOT NULL,
+    "lastMaintenanceDate" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Equipment_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Member" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "tier" TEXT NOT NULL,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
     "activeRentalCount" INTEGER NOT NULL DEFAULT 0,
     "totalRentalCount" INTEGER NOT NULL DEFAULT 0,
-    "joinDate" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
+    "joinDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Member_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Rental" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "equipmentId" TEXT NOT NULL,
     "memberId" TEXT NOT NULL,
-    "startDate" DATETIME NOT NULL,
-    "endDate" DATETIME NOT NULL,
+    "startDate" TIMESTAMP(3) NOT NULL,
+    "endDate" TIMESTAMP(3) NOT NULL,
     "status" TEXT NOT NULL,
-    "baseCostAmount" REAL NOT NULL,
+    "baseCostAmount" DOUBLE PRECISION NOT NULL,
     "baseCostCurrency" TEXT NOT NULL DEFAULT 'USD',
-    "lateFeeAmount" REAL NOT NULL DEFAULT 0,
+    "lateFeeAmount" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "lateFeeCurrency" TEXT NOT NULL DEFAULT 'USD',
-    "totalCostAmount" REAL NOT NULL,
+    "totalCostAmount" DOUBLE PRECISION NOT NULL,
     "totalCostCurrency" TEXT NOT NULL DEFAULT 'USD',
     "conditionAtStart" TEXT NOT NULL,
     "conditionAtReturn" TEXT,
-    "returnedAt" DATETIME,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
-    CONSTRAINT "Rental_equipmentId_fkey" FOREIGN KEY ("equipmentId") REFERENCES "Equipment" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "Rental_memberId_fkey" FOREIGN KEY ("memberId") REFERENCES "Member" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    "returnedAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Rental_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Reservation" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "equipmentId" TEXT NOT NULL,
     "memberId" TEXT NOT NULL,
-    "startDate" DATETIME NOT NULL,
-    "endDate" DATETIME NOT NULL,
+    "startDate" TIMESTAMP(3) NOT NULL,
+    "endDate" TIMESTAMP(3) NOT NULL,
     "status" TEXT NOT NULL,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
-    "confirmedAt" DATETIME,
-    "cancelledAt" DATETIME,
-    "fulfilledAt" DATETIME,
-    "expiryDate" DATETIME,
-    CONSTRAINT "Reservation_equipmentId_fkey" FOREIGN KEY ("equipmentId") REFERENCES "Equipment" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "Reservation_memberId_fkey" FOREIGN KEY ("memberId") REFERENCES "Member" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "confirmedAt" TIMESTAMP(3),
+    "cancelledAt" TIMESTAMP(3),
+    "fulfilledAt" TIMESTAMP(3),
+    "expiryDate" TIMESTAMP(3),
+
+    CONSTRAINT "Reservation_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "PaymentIntent" (
+    "id" TEXT NOT NULL,
+    "rentalId" TEXT NOT NULL,
+    "amount" DOUBLE PRECISION NOT NULL,
+    "currency" TEXT NOT NULL,
+    "status" TEXT NOT NULL,
+    "metadata" TEXT NOT NULL DEFAULT '{}',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "PaymentIntent_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "DamageAssessment" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "rentalId" TEXT NOT NULL,
     "equipmentId" TEXT NOT NULL,
     "assessedBy" TEXT NOT NULL,
     "conditionBefore" TEXT NOT NULL,
     "conditionAfter" TEXT NOT NULL,
     "damageDescription" TEXT,
-    "repairCostAmount" REAL NOT NULL DEFAULT 0,
+    "repairCostAmount" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "repairCostCurrency" TEXT NOT NULL DEFAULT 'USD',
     "severity" TEXT NOT NULL,
-    "assessedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
-    CONSTRAINT "DamageAssessment_rentalId_fkey" FOREIGN KEY ("rentalId") REFERENCES "Rental" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "DamageAssessment_equipmentId_fkey" FOREIGN KEY ("equipmentId") REFERENCES "Equipment" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    "assessedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "DamageAssessment_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -142,6 +162,12 @@ CREATE INDEX "Reservation_startDate_idx" ON "Reservation"("startDate");
 CREATE INDEX "Reservation_endDate_idx" ON "Reservation"("endDate");
 
 -- CreateIndex
+CREATE INDEX "PaymentIntent_rentalId_idx" ON "PaymentIntent"("rentalId");
+
+-- CreateIndex
+CREATE INDEX "PaymentIntent_status_idx" ON "PaymentIntent"("status");
+
+-- CreateIndex
 CREATE INDEX "DamageAssessment_rentalId_idx" ON "DamageAssessment"("rentalId");
 
 -- CreateIndex
@@ -152,3 +178,21 @@ CREATE INDEX "DamageAssessment_severity_idx" ON "DamageAssessment"("severity");
 
 -- CreateIndex
 CREATE INDEX "DamageAssessment_assessedAt_idx" ON "DamageAssessment"("assessedAt");
+
+-- AddForeignKey
+ALTER TABLE "Rental" ADD CONSTRAINT "Rental_equipmentId_fkey" FOREIGN KEY ("equipmentId") REFERENCES "Equipment"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Rental" ADD CONSTRAINT "Rental_memberId_fkey" FOREIGN KEY ("memberId") REFERENCES "Member"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Reservation" ADD CONSTRAINT "Reservation_equipmentId_fkey" FOREIGN KEY ("equipmentId") REFERENCES "Equipment"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Reservation" ADD CONSTRAINT "Reservation_memberId_fkey" FOREIGN KEY ("memberId") REFERENCES "Member"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "DamageAssessment" ADD CONSTRAINT "DamageAssessment_rentalId_fkey" FOREIGN KEY ("rentalId") REFERENCES "Rental"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "DamageAssessment" ADD CONSTRAINT "DamageAssessment_equipmentId_fkey" FOREIGN KEY ("equipmentId") REFERENCES "Equipment"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

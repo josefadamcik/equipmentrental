@@ -21,6 +21,7 @@ import { ReservationController } from './adapters/inbound/http/controllers/Reser
 import { ILogger } from './infrastructure/logging/Logger.js';
 import { PrismaClient } from '@prisma/client';
 import { PrismaLibSql } from '@prisma/adapter-libsql';
+import { PrismaPg } from '@prisma/adapter-pg';
 import { Server } from 'http';
 
 /**
@@ -73,15 +74,27 @@ async function bootstrap(): Promise<void> {
       prismaClient: useInMemoryAdapters
         ? undefined
         : ((): PrismaClient => {
+            const logConfig = config.database.logQueries
+              ? (['query', 'info', 'warn', 'error'] as const)
+              : (['warn', 'error'] as const);
+
+            // PostgreSQL: use PrismaClient with pg adapter (Prisma 7 client engine requires an adapter)
+            if (config.database.url.startsWith('postgresql://') || config.database.url.startsWith('postgres://')) {
+              const adapter = new PrismaPg({ connectionString: config.database.url });
+              return new PrismaClient({
+                adapter,
+                log: [...logConfig],
+              });
+            }
+
+            // SQLite via libsql adapter (local dev without Docker)
             const adapter = new PrismaLibSql({
               url: `file:${config.database.url.replace('file:', '')}`,
             });
             return new PrismaClient({
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               adapter: adapter as any,
-              log: config.database.logQueries
-                ? ['query', 'info', 'warn', 'error']
-                : ['warn', 'error'],
+              log: [...logConfig],
             });
           })(),
     });
