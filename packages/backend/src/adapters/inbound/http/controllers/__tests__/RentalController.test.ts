@@ -5,6 +5,7 @@ import { RentalService } from '../../../../../application/services/RentalService
 import { GetRentalQueryHandler } from '../../../../../application/queries/GetRentalQuery.js';
 import { GetMemberRentalsQueryHandler } from '../../../../../application/queries/GetMemberRentalsQuery.js';
 import { GetOverdueRentalsQueryHandler } from '../../../../../application/queries/GetOverdueRentalsQuery.js';
+import { RentalRepository } from '../../../../../domain/ports/RentalRepository.js';
 import { errorHandler } from '../../middleware/errorHandler.js';
 import { EquipmentNotFoundError } from '../../../../../domain/exceptions/EquipmentExceptions.js';
 
@@ -14,6 +15,7 @@ describe('RentalController', () => {
   let getRentalQueryHandler: jest.Mocked<GetRentalQueryHandler>;
   let getMemberRentalsQueryHandler: jest.Mocked<GetMemberRentalsQueryHandler>;
   let getOverdueRentalsQueryHandler: jest.Mocked<GetOverdueRentalsQueryHandler>;
+  let rentalRepository: jest.Mocked<RentalRepository>;
 
   beforeEach(() => {
     // Create mock services
@@ -35,12 +37,17 @@ describe('RentalController', () => {
       execute: jest.fn(),
     } as unknown as jest.Mocked<GetOverdueRentalsQueryHandler>;
 
+    rentalRepository = {
+      findAll: jest.fn().mockResolvedValue([]),
+    } as unknown as jest.Mocked<RentalRepository>;
+
     // Create controller and app
     const controller = new RentalController(
       rentalService,
       getRentalQueryHandler,
       getMemberRentalsQueryHandler,
       getOverdueRentalsQueryHandler,
+      rentalRepository,
     );
 
     app = express();

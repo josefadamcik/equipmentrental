@@ -426,11 +426,19 @@ export default function ReservationDetailPage() {
           </div>
           <div className="flex justify-between py-2.5">
             <dt className="text-gray-500">Equipment ID</dt>
-            <dd className="font-mono text-gray-900 break-all">{reservation.equipmentId}</dd>
+            <dd className="font-mono break-all">
+              <Link to={`/equipment/${reservation.equipmentId}`} className="text-indigo-600 hover:text-indigo-500">
+                {reservation.equipmentId}
+              </Link>
+            </dd>
           </div>
           <div className="flex justify-between py-2.5">
             <dt className="text-gray-500">Member ID</dt>
-            <dd className="font-mono text-gray-900 break-all">{reservation.memberId}</dd>
+            <dd className="font-mono break-all">
+              <Link to={`/members/${reservation.memberId}`} className="text-indigo-600 hover:text-indigo-500">
+                {reservation.memberId}
+              </Link>
+            </dd>
           </div>
           <div className="flex justify-between py-2.5">
             <dt className="text-gray-500">Start Date</dt>

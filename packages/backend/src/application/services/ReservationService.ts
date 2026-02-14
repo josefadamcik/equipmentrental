@@ -27,6 +27,7 @@ import {
 import {
   ReservationNotFoundError,
   ReservationAlreadyCancelledError,
+  InvalidReservationStateError,
 } from '../../domain/exceptions/ReservationExceptions.js';
 import { getMaxConcurrentRentals } from '../../domain/types/MembershipTier.js';
 
@@ -300,7 +301,9 @@ export class ReservationService {
     }
 
     if (reservation.status !== ReservationStatus.CONFIRMED) {
-      throw new Error('Only confirmed reservations can be fulfilled');
+      throw new InvalidReservationStateError(
+        params.reservationId, reservation.status, 'Only confirmed reservations can be fulfilled',
+      );
     }
 
     // Find equipment

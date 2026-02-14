@@ -3,6 +3,7 @@ import { RentalService } from '../../../../application/services/RentalService.js
 import { GetRentalQueryHandler } from '../../../../application/queries/GetRentalQuery.js';
 import { GetMemberRentalsQueryHandler } from '../../../../application/queries/GetMemberRentalsQuery.js';
 import { GetOverdueRentalsQueryHandler } from '../../../../application/queries/GetOverdueRentalsQuery.js';
+import { RentalRepository } from '../../../../domain/ports/RentalRepository.js';
 import { PaymentMethod } from '../../../../domain/ports/PaymentService.js';
 import { NotificationChannel } from '../../../../domain/ports/NotificationService.js';
 import {
@@ -30,6 +31,7 @@ export class RentalController {
     private readonly getRentalQueryHandler: GetRentalQueryHandler,
     private readonly getMemberRentalsQueryHandler: GetMemberRentalsQueryHandler,
     private readonly getOverdueRentalsQueryHandler: GetOverdueRentalsQueryHandler,
+    private readonly rentalRepository: RentalRepository,
   ) {
     this.router = Router();
     this.setupRoutes();
@@ -41,6 +43,15 @@ export class RentalController {
   private setupRoutes(): void {
     // POST /api/rentals - Create a new rental
     this.router.post('/', validateBody(createRentalSchema), this.createRental.bind(this));
+
+    // GET /api/rentals/status/overdue - Get overdue rentals (before parameterized routes)
+    this.router.get('/status/overdue', this.getOverdueRentals.bind(this));
+
+    // GET /api/rentals/member/:memberId - Get member's rentals
+    this.router.get('/member/:memberId', this.getMemberRentals.bind(this));
+
+    // GET /api/rentals - List all rentals
+    this.router.get('/', this.listRentals.bind(this));
 
     // GET /api/rentals/:rentalId - Get rental details
     this.router.get('/:rentalId', this.getRental.bind(this));
@@ -58,12 +69,6 @@ export class RentalController {
       validateBody(extendRentalSchema),
       this.extendRental.bind(this),
     );
-
-    // GET /api/rentals/overdue - Get overdue rentals
-    this.router.get('/status/overdue', this.getOverdueRentals.bind(this));
-
-    // GET /api/rentals/member/:memberId - Get member's rentals
-    this.router.get('/member/:memberId', this.getMemberRentals.bind(this));
   }
 
   /**
@@ -71,6 +76,34 @@ export class RentalController {
    */
   public getRouter(): Router {
     return this.router;
+  }
+
+  /**
+   * GET /api/rentals
+   * List all rentals
+   */
+  private async listRentals(_req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const rentals = await this.rentalRepository.findAll();
+
+      const response: GetRentalResponse[] = rentals.map((rental) => ({
+        rentalId: rental.id.value,
+        equipmentId: rental.equipmentId.value,
+        memberId: rental.memberId.value,
+        startDate: rental.period.start.toISOString(),
+        endDate: rental.period.end.toISOString(),
+        status: rental.status,
+        totalCost: rental.totalCost.amount,
+        conditionAtStart: rental.conditionAtStart,
+        conditionAtReturn: rental.conditionAtReturn,
+        actualReturnDate: rental.returnedAt?.toISOString(),
+        lateFee: rental.lateFee.amount,
+      }));
+
+      res.status(200).json(response);
+    } catch (error) {
+      next(error);
+    }
   }
 
   /**

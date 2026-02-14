@@ -123,6 +123,25 @@ export const updateEquipmentSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
+// Member schemas
+// ---------------------------------------------------------------------------
+
+const membershipTierSchema = z.enum(['BASIC', 'SILVER', 'GOLD', 'PLATINUM']);
+
+export const createMemberSchema = z.object({
+  name: z.string().min(1, 'name is required'),
+  email: z.string().email('Invalid email address'),
+  tier: membershipTierSchema.optional().default('BASIC'),
+});
+
+export const updateMemberSchema = z.object({
+  name: z.string().min(1, 'name cannot be empty').optional(),
+  email: z.string().email('Invalid email address').optional(),
+  tier: membershipTierSchema.optional(),
+  isActive: z.boolean().optional(),
+});
+
+// ---------------------------------------------------------------------------
 // Inferred request types (usable in place of the manual DTOs for validation)
 // ---------------------------------------------------------------------------
 
@@ -137,3 +156,6 @@ export type FulfillReservationInput = z.infer<typeof fulfillReservationSchema>;
 
 export type CreateEquipmentInput = z.infer<typeof createEquipmentSchema>;
 export type UpdateEquipmentInput = z.infer<typeof updateEquipmentSchema>;
+
+export type CreateMemberInput = z.infer<typeof createMemberSchema>;
+export type UpdateMemberInput = z.infer<typeof updateMemberSchema>;

@@ -77,8 +77,8 @@ function validate(values: FormValues): FormErrors {
   }
   if (!values.startDate) {
     errors.startDate = 'Start date is required';
-  } else if (values.startDate < todayISO()) {
-    errors.startDate = 'Start date must be today or in the future';
+  } else if (values.startDate <= todayISO()) {
+    errors.startDate = 'Start date must be in the future';
   }
   if (!values.endDate) {
     errors.endDate = 'End date is required';

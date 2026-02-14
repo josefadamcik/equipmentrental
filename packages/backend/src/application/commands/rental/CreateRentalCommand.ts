@@ -16,6 +16,7 @@ import {
   RentalLimitExceededError,
   MemberInactiveError,
 } from '../../../domain/exceptions/MemberExceptions.js';
+import { RentalNotAllowedError } from '../../../domain/exceptions/RentalExceptions.js';
 import { getMaxConcurrentRentals } from '../../../domain/types/MembershipTier.js';
 
 /**
@@ -84,7 +85,7 @@ export class CreateRentalCommandHandler {
     // Validate rental period is within member's tier limits
     const maxRentalDays = member.getMaxRentalDays();
     if (period.getDays() > maxRentalDays) {
-      throw new Error(
+      throw new RentalNotAllowedError(
         `Rental period of ${period.getDays()} days exceeds member's maximum of ${maxRentalDays} days`,
       );
     }
@@ -95,7 +96,7 @@ export class CreateRentalCommandHandler {
       period,
     );
     if (conflictingReservations.length > 0) {
-      throw new Error(
+      throw new RentalNotAllowedError(
         `Equipment is reserved during the requested period. ${conflictingReservations.length} conflicting reservation(s) found.`,
       );
     }

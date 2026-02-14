@@ -11,6 +11,8 @@ import {
   MemberNotFoundError,
   MemberInactiveError,
 } from '../../../domain/exceptions/MemberExceptions.js';
+import { RentalNotAllowedError } from '../../../domain/exceptions/RentalExceptions.js';
+import { InvalidReservationStateError } from '../../../domain/exceptions/ReservationExceptions.js';
 
 /**
  * Command to create a new reservation
@@ -71,13 +73,13 @@ export class CreateReservationCommandHandler {
     // Validate reservation period is in the future
     const now = new Date();
     if (period.hasStarted(now)) {
-      throw new Error('Reservation must be for a future date');
+      throw new InvalidReservationStateError('new', 'PENDING', 'Reservation must be for a future date');
     }
 
     // Validate rental period is within member's tier limits
     const maxRentalDays = member.getMaxRentalDays();
     if (period.getDays() > maxRentalDays) {
-      throw new Error(
+      throw new RentalNotAllowedError(
         `Reservation period of ${period.getDays()} days exceeds member's maximum of ${maxRentalDays} days`,
       );
     }
@@ -88,7 +90,7 @@ export class CreateReservationCommandHandler {
       period,
     );
     if (conflictingReservations.length > 0) {
-      throw new Error(
+      throw new RentalNotAllowedError(
         `Equipment is already reserved during the requested period. ${conflictingReservations.length} conflicting reservation(s) found.`,
       );
     }

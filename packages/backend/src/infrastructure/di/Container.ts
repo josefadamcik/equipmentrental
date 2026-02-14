@@ -425,12 +425,14 @@ export class Container {
       const getOverdueRentalsQueryHandler = this.resolve<GetOverdueRentalsQueryHandler>(
         DI_TOKENS.GetOverdueRentalsQueryHandler,
       );
+      const rentalRepo = this.resolve<RentalRepository>(DI_TOKENS.RentalRepository);
 
       return new RentalController(
         rentalService,
         getRentalQueryHandler,
         getMemberRentalsQueryHandler,
         getOverdueRentalsQueryHandler,
+        rentalRepo,
       );
     });
 

@@ -4,7 +4,7 @@ import { MemberRepository } from '../../../domain/ports/MemberRepository.js';
 import { RentalRepository } from '../../../domain/ports/RentalRepository.js';
 import { ReservationRepository } from '../../../domain/ports/ReservationRepository.js';
 import { DateRange } from '../../../domain/value-objects/DateRange.js';
-import { RentalNotFoundError } from '../../../domain/exceptions/RentalExceptions.js';
+import { RentalNotFoundError, InvalidRentalExtensionError } from '../../../domain/exceptions/RentalExceptions.js';
 import { EquipmentNotFoundError } from '../../../domain/exceptions/EquipmentExceptions.js';
 import { MemberNotFoundError } from '../../../domain/exceptions/MemberExceptions.js';
 
@@ -42,7 +42,7 @@ export class ExtendRentalCommandHandler {
   async execute(command: ExtendRentalCommand): Promise<ExtendRentalResult> {
     // Validate input
     if (command.additionalDays <= 0) {
-      throw new Error('Extension days must be positive');
+      throw new InvalidRentalExtensionError('Extension days must be positive');
     }
 
     // Parse rental ID
@@ -83,7 +83,7 @@ export class ExtendRentalCommandHandler {
       extendedPeriod,
     );
     if (conflictingReservations.length > 0) {
-      throw new Error(
+      throw new InvalidRentalExtensionError(
         `Cannot extend rental: equipment is reserved during the extension period. ${conflictingReservations.length} conflicting reservation(s) found.`,
       );
     }
@@ -92,7 +92,7 @@ export class ExtendRentalCommandHandler {
     const totalDays = rental.getDurationDays() + command.additionalDays;
     const maxRentalDays = member.getMaxRentalDays();
     if (totalDays > maxRentalDays) {
-      throw new Error(
+      throw new InvalidRentalExtensionError(
         `Total rental period of ${totalDays} days would exceed member's maximum of ${maxRentalDays} days`,
       );
     }

@@ -150,7 +150,7 @@ describe('Rental Entity', () => {
       rental.returnRental(EquipmentCondition.GOOD);
 
       expect(() => rental.returnRental(EquipmentCondition.GOOD)).toThrow(
-        'Only active or overdue rentals can be returned',
+        'already been returned',
       );
     });
   });
@@ -199,7 +199,7 @@ describe('Rental Entity', () => {
       rental.returnRental(EquipmentCondition.GOOD);
 
       expect(() => rental.extendPeriod(3, Money.dollars(75))).toThrow(
-        'Only active or overdue rentals can be extended',
+        'Rental is not active or overdue',
       );
     });
   });

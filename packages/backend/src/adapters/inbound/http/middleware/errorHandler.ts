@@ -21,11 +21,13 @@ import {
   RentalNotFoundError,
   RentalAlreadyReturnedError,
   InvalidRentalExtensionError,
+  InvalidStateTransitionError,
   OverdueRentalError,
 } from '../../../../domain/exceptions/RentalExceptions.js';
 import {
   ReservationNotFoundError,
   ReservationAlreadyCancelledError,
+  InvalidReservationStateError,
 } from '../../../../domain/exceptions/ReservationExceptions.js';
 import { ErrorResponse } from '../dtos/ErrorDTOs.js';
 
@@ -54,7 +56,9 @@ function getStatusCodeForException(error: Error): number {
     error instanceof RentalAlreadyReturnedError ||
     error instanceof InvalidRentalExtensionError ||
     error instanceof OverdueRentalError ||
-    error instanceof ReservationAlreadyCancelledError
+    error instanceof ReservationAlreadyCancelledError ||
+    error instanceof InvalidReservationStateError ||
+    error instanceof InvalidStateTransitionError
   ) {
     return 409;
   }

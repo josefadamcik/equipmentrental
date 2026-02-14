@@ -13,6 +13,7 @@ import RentalDetailPage from './pages/RentalDetailPage';
 import ReservationsPage from './pages/ReservationsPage';
 import CreateReservationPage from './pages/CreateReservationPage';
 import ReservationDetailPage from './pages/ReservationDetailPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 const router = createBrowserRouter([
   {
@@ -43,6 +44,9 @@ const router = createBrowserRouter([
       { path: 'reservations', element: <ReservationsPage /> },
       { path: 'reservations/new', element: <CreateReservationPage /> },
       { path: 'reservations/:id', element: <ReservationDetailPage /> },
+
+      // 404 catch-all
+      { path: '*', element: <NotFoundPage /> },
     ],
   },
 ]);

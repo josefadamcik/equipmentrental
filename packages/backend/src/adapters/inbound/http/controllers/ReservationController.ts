@@ -41,6 +41,9 @@ export class ReservationController {
     // POST /api/reservations - Create a new reservation
     this.router.post('/', validateBody(createReservationSchema), this.createReservation.bind(this));
 
+    // GET /api/reservations - List all reservations
+    this.router.get('/', this.listReservations.bind(this));
+
     // GET /api/reservations/:reservationId - Get reservation details
     this.router.get('/:reservationId', this.getReservation.bind(this));
 
@@ -78,6 +81,34 @@ export class ReservationController {
    */
   public getRouter(): Router {
     return this.router;
+  }
+
+  /**
+   * GET /api/reservations
+   * List all reservations
+   */
+  private async listReservations(
+    _req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const reservations = await this.reservationRepository.findAll();
+
+      const response: GetReservationResponse[] = reservations.map((reservation) => ({
+        reservationId: reservation.id.value,
+        equipmentId: reservation.equipmentId.value,
+        memberId: reservation.memberId.value,
+        startDate: reservation.period.start.toISOString(),
+        endDate: reservation.period.end.toISOString(),
+        status: reservation.status,
+        createdAt: reservation.createdAt.toISOString(),
+      }));
+
+      res.status(200).json(response);
+    } catch (error) {
+      next(error);
+    }
   }
 
   /**

@@ -3,6 +3,11 @@ import { Money } from '../value-objects/Money.js';
 import { DateRange } from '../value-objects/DateRange.js';
 import { RentalStatus } from '../types/RentalStatus.js';
 import { EquipmentCondition } from '../types/EquipmentCondition.js';
+import {
+  RentalAlreadyReturnedError,
+  InvalidRentalExtensionError,
+  InvalidStateTransitionError,
+} from '../exceptions/RentalExceptions.js';
 
 export interface RentalProps {
   id: RentalId;
@@ -138,7 +143,10 @@ export class Rental {
     now: Date = new Date(),
   ): void {
     if (this.props.status !== RentalStatus.ACTIVE && this.props.status !== RentalStatus.OVERDUE) {
-      throw new Error('Only active or overdue rentals can be returned');
+      if (this.props.status === RentalStatus.RETURNED) {
+        throw new RentalAlreadyReturnedError(this.props.id.value);
+      }
+      throw new InvalidStateTransitionError(this.props.status, 'RETURNED');
     }
 
     // If returning late, calculate late fees
@@ -161,7 +169,7 @@ export class Rental {
    */
   extendPeriod(additionalDays: number, additionalCost: Money): void {
     if (this.props.status !== RentalStatus.ACTIVE && this.props.status !== RentalStatus.OVERDUE) {
-      throw new Error('Only active or overdue rentals can be extended');
+      throw new InvalidRentalExtensionError('Rental is not active or overdue');
     }
 
     if (additionalDays <= 0) {

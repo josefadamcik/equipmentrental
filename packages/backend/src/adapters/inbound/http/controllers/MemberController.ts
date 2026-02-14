@@ -3,7 +3,11 @@ import { GetMemberRentalsQueryHandler } from '../../../../application/queries/Ge
 import { MemberRepository } from '../../../../domain/ports/MemberRepository.js';
 import { EquipmentRepository } from '../../../../domain/ports/EquipmentRepository.js';
 import { MemberId, EquipmentId } from '../../../../domain/value-objects/identifiers.js';
+import { Member } from '../../../../domain/entities/Member.js';
+import { MembershipTier } from '../../../../domain/types/MembershipTier.js';
 import { GetMemberResponse, GetMemberRentalsResponse } from '../dtos/MemberDTOs.js';
+import { validateBody } from '../validation/middleware.js';
+import { createMemberSchema, updateMemberSchema } from '../validation/schemas.js';
 
 /**
  * HTTP Controller for Member operations
@@ -25,8 +29,21 @@ export class MemberController {
    * Setup all routes for member operations
    */
   private setupRoutes(): void {
+    // GET /api/members - List all members
+    this.router.get('/', this.listMembers.bind(this));
+
+    // POST /api/members - Create a new member
+    this.router.post('/', validateBody(createMemberSchema), this.createMember.bind(this));
+
     // GET /api/members/:memberId - Get member details
     this.router.get('/:memberId', this.getMember.bind(this));
+
+    // PUT /api/members/:memberId - Update member
+    this.router.put(
+      '/:memberId',
+      validateBody(updateMemberSchema),
+      this.updateMember.bind(this),
+    );
 
     // GET /api/members/:memberId/rentals - Get member's rentals
     this.router.get('/:memberId/rentals', this.getMemberRentals.bind(this));
@@ -37,6 +54,64 @@ export class MemberController {
    */
   public getRouter(): Router {
     return this.router;
+  }
+
+  /**
+   * GET /api/members
+   * List all members
+   */
+  private async listMembers(_req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const members = await this.memberRepository.findAll();
+
+      const response: GetMemberResponse[] = members.map((member) => ({
+        memberId: member.id.value,
+        name: member.name,
+        email: member.email,
+        tier: member.tier,
+        joinDate: member.joinDate.toISOString(),
+        isActive: member.isActive,
+        activeRentalCount: member.activeRentalCount,
+      }));
+
+      res.status(200).json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * POST /api/members
+   * Create a new member
+   */
+  private async createMember(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { name, email, tier } = req.body;
+
+      const member = Member.create({
+        name,
+        email,
+        tier: (tier ?? 'BASIC') as MembershipTier,
+        joinDate: new Date(),
+        isActive: true,
+      });
+
+      await this.memberRepository.save(member);
+
+      const response: GetMemberResponse = {
+        memberId: member.id.value,
+        name: member.name,
+        email: member.email,
+        tier: member.tier,
+        joinDate: member.joinDate.toISOString(),
+        isActive: member.isActive,
+        activeRentalCount: member.activeRentalCount,
+      };
+
+      res.status(201).json(response);
+    } catch (error) {
+      next(error);
+    }
   }
 
   /**
@@ -58,6 +133,63 @@ export class MemberController {
         });
         return;
       }
+
+      const response: GetMemberResponse = {
+        memberId: member.id.value,
+        name: member.name,
+        email: member.email,
+        tier: member.tier,
+        joinDate: member.joinDate.toISOString(),
+        isActive: member.isActive,
+        activeRentalCount: member.activeRentalCount,
+      };
+
+      res.status(200).json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * PUT /api/members/:memberId
+   * Update member details
+   */
+  private async updateMember(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const memberId = req.params['memberId'] as string;
+      const updates = req.body;
+
+      const member = await this.memberRepository.findById(MemberId.create(memberId));
+
+      if (!member) {
+        res.status(404).json({
+          error: {
+            code: 'MEMBER_NOT_FOUND',
+            message: `Member not found: ${memberId}`,
+          },
+        });
+        return;
+      }
+
+      // Apply updates via domain methods
+      if (updates.name !== undefined) {
+        member.updateName(updates.name);
+      }
+      if (updates.email !== undefined) {
+        member.updateEmail(updates.email);
+      }
+      if (updates.tier !== undefined) {
+        member.upgradeTier(updates.tier as MembershipTier);
+      }
+      if (updates.isActive !== undefined) {
+        if (updates.isActive) {
+          member.reactivate();
+        } else {
+          member.deactivate();
+        }
+      }
+
+      await this.memberRepository.save(member);
 
       const response: GetMemberResponse = {
         memberId: member.id.value,

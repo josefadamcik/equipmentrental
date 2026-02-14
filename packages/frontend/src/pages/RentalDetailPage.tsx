@@ -170,11 +170,19 @@ export default function RentalDetailPage() {
             </div>
             <div className="flex justify-between py-2.5">
               <dt className="text-gray-500">Equipment ID</dt>
-              <dd className="font-mono text-gray-900">{rental.equipmentId}</dd>
+              <dd className="font-mono">
+                <Link to={`/equipment/${rental.equipmentId}`} className="text-indigo-600 hover:text-indigo-500">
+                  {rental.equipmentId}
+                </Link>
+              </dd>
             </div>
             <div className="flex justify-between py-2.5">
               <dt className="text-gray-500">Member ID</dt>
-              <dd className="font-mono text-gray-900">{rental.memberId}</dd>
+              <dd className="font-mono">
+                <Link to={`/members/${rental.memberId}`} className="text-indigo-600 hover:text-indigo-500">
+                  {rental.memberId}
+                </Link>
+              </dd>
             </div>
             <div className="flex justify-between py-2.5">
               <dt className="text-gray-500">Start Date</dt>

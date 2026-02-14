@@ -1,5 +1,6 @@
 import { ReservationId, EquipmentId, MemberId } from '../value-objects/identifiers.js';
 import { DateRange } from '../value-objects/DateRange.js';
+import { InvalidReservationStateError } from '../exceptions/ReservationExceptions.js';
 
 export const ReservationStatus = {
   PENDING: 'PENDING',
@@ -38,7 +39,7 @@ export class Reservation {
 
     // Ensure reservation is for the future
     if (props.period.hasStarted(now)) {
-      throw new Error('Reservation period must be in the future');
+      throw new InvalidReservationStateError('new', 'PENDING', 'Reservation period must be in the future');
     }
 
     return new Reservation({
@@ -97,7 +98,9 @@ export class Reservation {
    */
   confirm(now: Date = new Date()): void {
     if (this.props.status !== ReservationStatus.PENDING) {
-      throw new Error('Only pending reservations can be confirmed');
+      throw new InvalidReservationStateError(
+        this.props.id.value, this.props.status, 'Only pending reservations can be confirmed',
+      );
     }
 
     if (this.props.period.hasStarted(now)) {
@@ -116,7 +119,9 @@ export class Reservation {
       this.props.status !== ReservationStatus.PENDING &&
       this.props.status !== ReservationStatus.CONFIRMED
     ) {
-      throw new Error('Only pending or confirmed reservations can be cancelled');
+      throw new InvalidReservationStateError(
+        this.props.id.value, this.props.status, 'Only pending or confirmed reservations can be cancelled',
+      );
     }
 
     if (this.props.period.hasEnded(now)) {
@@ -132,11 +137,15 @@ export class Reservation {
    */
   fulfill(now: Date = new Date()): void {
     if (this.props.status !== ReservationStatus.CONFIRMED) {
-      throw new Error('Only confirmed reservations can be fulfilled');
+      throw new InvalidReservationStateError(
+        this.props.id.value, this.props.status, 'Only confirmed reservations can be fulfilled',
+      );
     }
 
     if (!this.props.period.hasStarted(now)) {
-      throw new Error('Cannot fulfill reservation before start date');
+      throw new InvalidReservationStateError(
+        this.props.id.value, this.props.status, 'Cannot fulfill reservation before start date',
+      );
     }
 
     this.props.status = ReservationStatus.FULFILLED;
